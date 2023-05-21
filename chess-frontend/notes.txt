@@ -1,0 +1,29 @@
+https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_shapes_square
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.squareB {
+  height: 50px;
+  width: 50px;
+  background-color: #000;
+}
+.squareW {
+  height: 50px;
+  width: 50px;
+  background-color: #FFF;
+}
+</style>
+</head>
+<body style="background-color:powderblue;">
+
+<h2>Square CSS</h2>
+<div class="squareB"></div>
+<div class="squareW"></div>
+
+</body>
+</html> 
