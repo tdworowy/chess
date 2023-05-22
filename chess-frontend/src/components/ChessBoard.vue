@@ -26,15 +26,15 @@ li {
 </style>
 
 <template>
-  <ul v-for="i in 4" class="no-bullets">
+  <ul v-for="i in 8" class="no-bullets">
     <li v-for="j in 8">
       <div v-if="j % 2 == 0">
-        <div class="squareBlack"></div>
-        <div class="squareWhite"></div>
+        <div v-if="i % 2 == 0" class="squareBlack" :id="i + '_' + j"></div>
+        <div v-else class="squareWhite" :id="i + '_' + j"></div>
       </div>
       <div v-else>
-        <div class="squareWhite"></div>
-        <div class="squareBlack"></div>
+        <div v-if="i % 2 == 0" class="squareWhite" :id="i + '_' + j"></div>
+        <div v-else class="squareBlack" :id="i + '_' + j"></div>
       </div>
     </li>
   </ul>
