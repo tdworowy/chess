@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const testId = { 'data-testid': 'squer' }
+const testId = { 'data-testid': 'square' }
 </script>
 
 <style>

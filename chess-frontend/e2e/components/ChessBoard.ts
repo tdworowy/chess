@@ -15,7 +15,7 @@ class ChessBoard {
   }
 
   testId = {
-    squer: 'squer'
+    squer: 'square'
   }
 
   async assertRender() {
@@ -38,6 +38,9 @@ class ChessBoard {
       if (i % 2 == 0 && j % 2 !== 0) {
         expect(squer.locator(`[id='${i}_${j}']`)).toHaveClass('squareWhite')
       }
+
+      i++
+      j++
     }
   }
 }
