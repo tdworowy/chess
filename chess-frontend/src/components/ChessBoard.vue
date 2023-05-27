@@ -1,4 +1,6 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const testId = { 'data-testid': 'squer' }
+</script>
 
 <style>
 .squareBlack {
@@ -29,12 +31,12 @@ li {
   <ul v-for="i in 8" class="no-bullets">
     <li v-for="j in 8">
       <div v-if="j % 2 == 0">
-        <div v-if="i % 2 == 0" class="squareBlack" :id="i + '_' + j"></div>
-        <div v-else class="squareWhite" :id="i + '_' + j"></div>
+        <div v-if="i % 2 == 0" class="squareBlack" v-bind="testId" :id="i + '_' + j"></div>
+        <div v-else class="squareWhite" v-bind="testId" :id="i + '_' + j"></div>
       </div>
       <div v-else>
-        <div v-if="i % 2 == 0" class="squareWhite" :id="i + '_' + j"></div>
-        <div v-else class="squareBlack" :id="i + '_' + j"></div>
+        <div v-if="i % 2 == 0" class="squareWhite" v-bind="testId" :id="i + '_' + j"></div>
+        <div v-else class="squareBlack" v-bind="testId" :id="i + '_' + j"></div>
       </div>
     </li>
   </ul>

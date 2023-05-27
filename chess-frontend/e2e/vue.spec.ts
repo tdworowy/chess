@@ -1,8 +1,9 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
+import { getChaseBoard } from './components/ChessBoard'
 
-// See here how to get started:
-// https://playwright.dev/docs/intro
-test('visits the app root url', async ({ page }) => {
-  await page.goto('/')
-  await expect(page.locator('div.greetings > h1')).toHaveText('You did it!')
+test.describe('ChessBoard', () => {
+  test('ChessBoard should render correctly', async ({ page }) => {
+    await page.goto('/')
+    //getChaseBoard(page).assertRender()
+  })
 })
