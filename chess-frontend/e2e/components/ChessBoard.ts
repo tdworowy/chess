@@ -1,6 +1,5 @@
 import { Page } from 'playwright-core'
 import { expect } from '@playwright/test'
-import { getByTestId } from '../urils'
 
 class ChessBoard {
   page!: Page
@@ -15,32 +14,28 @@ class ChessBoard {
   }
 
   testId = {
-    squer: 'square'
+    square: 'square'
   }
 
   async assertRender() {
-    const squers = getByTestId(this.page, this.testId.squer)
-    expect(squers).toHaveCount(64)
+    const squers = this.page.getByTestId(this.testId.square)
+    await expect(squers).toHaveCount(64)
 
-    let i = 1
-    let j = 1
-
-    for (const squer of await squers.all()) {
-      if (i % 2 !== 0 && j % 2 == 0) {
-        expect(squer.locator(`[id='${i}_${j}']`)).toHaveClass('squareWhite')
+    for (let i = 1; i <= 8; i++) {
+      for (let j = 1; j <= 8; j++) {
+        if (i % 2 !== 0 && j % 2 === 0) {
+          await expect(this.page.locator(`[id="${i}_${j}"]`)).toHaveClass('squareBlack')
+        }
+        if (i % 2 !== 0 && j % 2 !== 0) {
+          await expect(this.page.locator(`[id="${i}_${j}"]`)).toHaveClass('squareWhite')
+        }
+        if (i % 2 === 0 && j % 2 === 0) {
+          await expect(this.page.locator(`[id="${i}_${j}"]`)).toHaveClass('squareWhite')
+        }
+        if (i % 2 === 0 && j % 2 !== 0) {
+          await expect(this.page.locator(`[id="${i}_${j}"]`)).toHaveClass('squareBlack')
+        }
       }
-      if (i % 2 !== 0 && j % 2 !== 0) {
-        expect(squer.locator(`[id='${i}_${j}']`)).toHaveClass('squareBlack')
-      }
-      if (i % 2 == 0 && j % 2 == 0) {
-        expect(squer.locator(`[id='${i}_${j}']`)).toHaveClass('squareBlack')
-      }
-      if (i % 2 == 0 && j % 2 !== 0) {
-        expect(squer.locator(`[id='${i}_${j}']`)).toHaveClass('squareWhite')
-      }
-
-      i++
-      j++
     }
   }
 }
