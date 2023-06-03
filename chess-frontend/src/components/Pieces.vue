@@ -3,8 +3,19 @@ const props = defineProps<{
   x: number
   y: number
 }>()
+const conditionBlack = (props: any) => {
+  return (props.y % 2 === 0 && props.x % 2 === 0) || (props.y % 2 !== 0 && props.x % 2 !== 0)
+}
+const conditionWhite = (props: any) => {
+  return (props.y % 2 === 0 && props.x % 2 !== 0) || (props.y % 2 !== 0 && props.x % 2 === 0)
+}
 
-const color = [1, 2, 3].includes(props.x) ? 'black' : [6, 7, 8].includes(props.x) ? 'white' : ''
+const color =
+  [1, 2, 3].includes(props.x) && conditionBlack(props)
+    ? 'black'
+    : [6, 7, 8].includes(props.x) && conditionWhite(props)
+    ? 'white'
+    : ''
 const pawnBlack = 'pawn pawnBlack'
 const pawnWhite = 'pawn pawnWhite'
 

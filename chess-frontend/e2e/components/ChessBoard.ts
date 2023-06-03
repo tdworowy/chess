@@ -16,7 +16,7 @@ class ChessBoard {
   testId = {
     square: 'square'
   }
-  
+
   async assertRender() {
     const squers = this.page.getByTestId(this.testId.square)
     await expect(squers).toHaveCount(64)
@@ -24,24 +24,24 @@ class ChessBoard {
     for (let i = 1; i <= 8; i++) {
       for (let j = 1; j <= 8; j++) {
         if (i % 2 !== 0 && j % 2 === 0) {
-          await expect(squers.filter({ has: this.page.locator(`[id="${i}_${j}"]`) })).toHaveClass(
-            'square squareBlack'
-          )
+          await expect(
+            this.page.locator(`[id="${i}_${j}"][data-testid='${this.testId.square}']`)
+          ).toHaveClass('square squareBlack')
         }
         if (i % 2 !== 0 && j % 2 !== 0) {
-          await expect(squers.filter({ has: this.page.locator(`[id="${i}_${j}"]`) })).toHaveClass(
-            'square squareWhite'
-          )
+          await expect(
+            this.page.locator(`[id="${i}_${j}"][data-testid='${this.testId.square}']`)
+          ).toHaveClass('square squareWhite')
         }
         if (i % 2 === 0 && j % 2 === 0) {
-          await expect(squers.filter({ has: this.page.locator(`[id="${i}_${j}"]`) })).toHaveClass(
-            'square squareWhite'
-          )
+          await expect(
+            this.page.locator(`[id="${i}_${j}"][data-testid='${this.testId.square}']`)
+          ).toHaveClass('square squareWhite')
         }
         if (i % 2 === 0 && j % 2 !== 0) {
-          await expect(squers.filter({ has: this.page.locator(`[id="${i}_${j}"]`) })).toHaveClass(
-            'square squareBlack'
-          )
+          await expect(
+            this.page.locator(`[id="${i}_${j}"][data-testid='${this.testId.square}']`)
+          ).toHaveClass('square squareBlack')
         }
       }
     }
