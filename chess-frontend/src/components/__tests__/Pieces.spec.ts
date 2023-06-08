@@ -8,7 +8,7 @@ describe('pieces', () => {
     const wrapperBlack = mount(Pieces, {
       propsData: {
         x: 1,
-        y: 1
+        y: 2
       }
     })
     const wrapperWhite = mount(Pieces, {
@@ -17,7 +17,7 @@ describe('pieces', () => {
         y: 1
       }
     })
-    expect(wrapperBlack.findAll('.pawnBlack').length).toEqual(1)
-    expect(wrapperWhite.findAll('.pawnWhite').length).toEqual(1)
+    expect(wrapperBlack.findAll('.pawnDark').length).toEqual(1)
+    expect(wrapperWhite.findAll('.pawnLight').length).toEqual(1)
   })
 })

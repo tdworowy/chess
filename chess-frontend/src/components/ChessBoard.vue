@@ -7,9 +7,14 @@ const classBlack = ' square squareWhite'
 </script>
 
 <style>
+.container {
+  justify-content: center;
+  align-items: center;
+}
 .square {
   height: 75px;
   width: 75px;
+  position: relative;
 }
 .squareBlack {
   background-color: #000;
@@ -32,6 +37,7 @@ li {
 </style>
 
 <template>
+  <div class="container">
   <ul v-for="i in 8" class="no-bullets">
     <li v-for="j in 8">
       <div v-if="j % 2 == 0">
@@ -52,4 +58,5 @@ li {
       </div>
     </li>
   </ul>
+</div>
 </template>

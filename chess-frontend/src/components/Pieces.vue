@@ -3,21 +3,18 @@ const props = defineProps<{
   x: number
   y: number
 }>()
-const conditionBlack = (props: any) => {
-  return (props.y % 2 === 0 && props.x % 2 === 0) || (props.y % 2 !== 0 && props.x % 2 !== 0)
-}
-const conditionWhite = (props: any) => {
+const condition = (props: any) => {
   return (props.y % 2 === 0 && props.x % 2 !== 0) || (props.y % 2 !== 0 && props.x % 2 === 0)
 }
 
 const color =
-  [1, 2, 3].includes(props.x) && conditionBlack(props)
-    ? 'black'
-    : [6, 7, 8].includes(props.x) && conditionWhite(props)
-    ? 'white'
+  [1, 2, 3].includes(props.x) && condition(props)
+    ? 'Dark'
+    : [6, 7, 8].includes(props.x) && condition(props)
+    ? 'Light'
     : ''
-const pawnBlack = 'pawn pawnBlack'
-const pawnWhite = 'pawn pawnWhite'
+const pawnDark = 'pawn pawnDark'
+const pawnLight = 'pawn pawnLight'
 
 const testId = { 'data-testid': 'pawn' }
 </script>
@@ -27,17 +24,33 @@ const testId = { 'data-testid': 'pawn' }
   height: 50px;
   width: 50px;
   border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: inline-block;
+  position: absolute;
 }
-.pawnBlack {
-  background-color: #000;
+.pawnDark {
+  background-color: #960a0a;
 }
-.pawnWhite {
-  background-color: #fff;
+.pawnLight {
+  background-color: #67c964;
 }
 </style>
 
 <template>
-  <div v-if="color === 'black'" :id="x + '_' + y" :class="pawnBlack" v-bind="testId"></div>
-  <div v-if="color === 'white'" :id="x + '_' + y" :class="pawnWhite" v-bind="testId"></div>
+  <div
+    v-if="color === 'Dark'"
+    :id="x + '_' + y"
+    :class="pawnDark"
+    v-bind="testId"
+    draggable="true"
+  ></div>
+  <div
+    v-if="color === 'Light'"
+    :id="x + '_' + y"
+    :class="pawnLight"
+    v-bind="testId"
+    draggable="true"
+  ></div>
 </template>
