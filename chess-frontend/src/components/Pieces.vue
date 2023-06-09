@@ -17,6 +17,11 @@ const pawnDark = 'pawn pawnDark'
 const pawnLight = 'pawn pawnLight'
 
 const testId = { 'data-testid': 'pawn' }
+
+function drag(event: DragEvent) {
+  const { target } = event
+  event.dataTransfer?.setData('id', (<HTMLElement>target)?.id)
+}
 </script>
 
 <style>
@@ -45,6 +50,7 @@ const testId = { 'data-testid': 'pawn' }
     :class="pawnDark"
     v-bind="testId"
     draggable="true"
+    v-on:dragstart="drag"
   ></div>
   <div
     v-if="color === 'Light'"
@@ -52,5 +58,6 @@ const testId = { 'data-testid': 'pawn' }
     :class="pawnLight"
     v-bind="testId"
     draggable="true"
+    v-on:dragstart="drag"
   ></div>
 </template>
