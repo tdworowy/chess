@@ -21,6 +21,7 @@ const testId = { 'data-testid': 'pawn' }
 function drag(event: DragEvent) {
   const { target } = event
   event.dataTransfer?.setData('id', (<HTMLElement>target)?.id)
+    // TODO change pieces id on drag
 }
 </script>
 

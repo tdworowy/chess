@@ -1,40 +1,15 @@
 <script setup lang="ts">
 import Pieces from './Pieces.vue'
+import Square from './Square.vue'
 
-const testId = { 'data-testid': 'square' }
-const classWhite = 'square squareBlack'
-const classBlack = ' square squareWhite'
-
-function allowDrop(event: DragEvent) {
-  event.preventDefault()
-}
-
-function drop(event: DragEvent) {
-  const { target } = event
-  event.preventDefault()
-  let data = event.dataTransfer?.getData('id')
-  if (data !== undefined) {
-    const element = document.querySelector(`[id='${data}'][class*='pawn']`) as HTMLElement
-    ;(<HTMLElement>target)?.appendChild(element)
-  }
-}
+const black = 'black'
+const white = 'white'
 </script>
 
 <style>
 .container {
   justify-content: center;
   align-items: center;
-}
-.square {
-  height: 75px;
-  width: 75px;
-  position: relative;
-}
-.squareBlack {
-  background-color: #000;
-}
-.squareWhite {
-  background-color: #fff;
 }
 
 ul.no-bullets {
@@ -55,46 +30,22 @@ li {
     <ul v-for="i in 8" class="no-bullets">
       <li v-for="j in 8">
         <div v-if="j % 2 == 0">
-          <div
-            v-if="i % 2 == 0"
-            v-bind="testId"
-            :class="classBlack"
-            :id="i + '_' + j"
-            v-on:drop="drop"
-            v-on:dragover="allowDrop"
-          >
+          <div v-if="i % 2 == 0">
+            <Square :i="i" :j="j" :color="black" />
             <Pieces :x="i" :y="j" />
           </div>
-          <div
-            v-else
-            v-bind="testId"
-            :class="classWhite"
-            :id="i + '_' + j"
-            v-on:drop="drop"
-            v-on:dragover="allowDrop"
-          >
+          <div v-else>
+            <Square :i="i" :j="j" :color="white" />
             <Pieces :x="i" :y="j" />
           </div>
         </div>
         <div v-else>
-          <div
-            v-if="i % 2 == 0"
-            v-bind="testId"
-            :class="classWhite"
-            :id="i + '_' + j"
-            v-on:drop="drop"
-            v-on:dragover="allowDrop"
-          >
+          <div v-if="i % 2 == 0">
+            <Square :i="i" :j="j" :color="white" />
             <Pieces :x="i" :y="j" />
           </div>
-          <div
-            v-else
-            v-bind="testId"
-            :class="classBlack"
-            :id="i + '_' + j"
-            v-on:drop="drop"
-            v-on:dragover="allowDrop"
-          >
+          <div v-else>
+            <Square :i="i" :j="j" :color="black" />
             <Pieces :x="i" :y="j" />
           </div>
         </div>
