@@ -17,11 +17,12 @@ function allowDrop(event: DragEvent) {
 function drop(event: DragEvent) {
   const { target } = event
   event.preventDefault()
-  let data = event.dataTransfer?.getData('id')
-  if (data !== undefined) {
-    const element = document.querySelector(`[id='${data}'][class*='pawn']`) as HTMLElement
-    ;(<HTMLElement>target)?.appendChild(element)
-  }
+  let draggableElementId = event.dataTransfer!.getData('id')
+  const element = document.querySelector(
+    `[id='${draggableElementId}'][class*='pawn']`
+  ) as HTMLElement
+  ;(<HTMLElement>target)!.appendChild(element)
+    element!.id = (<HTMLElement>target)!.id
 }
 </script>
 

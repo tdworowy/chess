@@ -16,12 +16,14 @@ ul.no-bullets {
   list-style-type: none;
   padding: 0;
   margin: 0;
+  list-style: none;
 }
 li {
   display: inline-block;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  vertical-align: top;
 }
 </style>
 
