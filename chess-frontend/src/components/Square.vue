@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { checkersRules } from '@/rules'
+
 const testId = { 'data-testid': 'square' }
 const classWhite = 'square squareBlack'
 const classBlack = ' square squareWhite'
@@ -18,11 +20,20 @@ function drop(event: DragEvent) {
   const { target } = event
   event.preventDefault()
   let draggableElementId = event.dataTransfer!.getData('id')
-  const element = document.querySelector(
-    `[id='${draggableElementId}'][class*='pawn']`
-  ) as HTMLElement
-  ;(<HTMLElement>target)!.appendChild(element)
+  let targetElementId = (<HTMLElement>target).getAttribute('id')
+
+  const [startX, startY] = draggableElementId.split('_').map((id) => Number(id))
+  const [endX, endY] = targetElementId!.split('_').map((id) => Number(id))
+
+  const element = document.querySelector(`[id='${targetElementId}'][class*='pawn']`)
+
+  if (checkersRules.canMove(startX, startY, endX, endY) && !element) {
+    const element = document.querySelector(
+      `[id='${draggableElementId}'][class*='pawn']`
+    ) as HTMLElement
+    ;(<HTMLElement>target)!.appendChild(element)
     element!.id = (<HTMLElement>target)!.id
+  }
 }
 </script>
 
