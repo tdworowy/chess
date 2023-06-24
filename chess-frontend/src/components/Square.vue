@@ -19,8 +19,8 @@ function allowDrop(event: DragEvent) {
 function drop(event: DragEvent) {
   const { target } = event
   event.preventDefault()
-  let draggableElementId = event.dataTransfer!.getData('id')
-  let targetElementId = (<HTMLElement>target).getAttribute('id')
+  const draggableElementId = event.dataTransfer!.getData('id')
+  const targetElementId = (<HTMLElement>target).getAttribute('id')
 
   const [startX, startY] = draggableElementId.split('_').map((id) => Number(id))
   const [endX, endY] = targetElementId!.split('_').map((id) => Number(id))
