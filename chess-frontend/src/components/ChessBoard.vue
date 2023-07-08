@@ -1,9 +1,18 @@
 <script setup lang="ts">
 import Pieces from './Pieces.vue'
 import Square from './Square.vue'
+import { pieceColorCondiion } from './piecesUtils'
 
 const black = 'black'
 const white = 'white'
+
+let boardArray: { [key: string]: string } = {}
+
+for (let i = 1; i <= 8; i++) {
+  for (let j = 1; j <= 8; j++) {
+    boardArray[`${i}_${j}`] = pieceColorCondiion(i, j)
+  }
+}// TODO update on drag
 </script>
 
 <style>

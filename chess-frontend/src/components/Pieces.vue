@@ -1,18 +1,13 @@
 <script setup lang="ts">
+import { pieceColorCondiion } from './piecesUtils'
+
 const props = defineProps<{
   x: number
   y: number
 }>()
-const condition = (props: any) => {
-  return (props.y % 2 === 0 && props.x % 2 !== 0) || (props.y % 2 !== 0 && props.x % 2 === 0)
-}
 
-const color =
-  [1, 2, 3].includes(props.x) && condition(props)
-    ? 'Dark'
-    : [6, 7, 8].includes(props.x) && condition(props)
-    ? 'Light'
-    : ''
+const color = pieceColorCondiion(props.x, props.y)
+
 const pawnDark = 'pawn pawnDark'
 const pawnLight = 'pawn pawnLight'
 
