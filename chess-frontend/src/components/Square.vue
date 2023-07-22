@@ -1,9 +1,18 @@
 <script setup lang="ts">
 import { checkersRules } from '@/rules'
+import type { boardStateType } from '@/types'
+import { inject } from 'vue'
 
 const testId = { 'data-testid': 'square' }
 const classWhite = 'square squareBlack'
 const classBlack = ' square squareWhite'
+
+const setState: boardStateType = <boardStateType>inject('setState')
+const getState = <
+  () => {
+    [key: string]: string
+  }
+>inject('getState')
 
 const props = defineProps<{
   i: number
@@ -33,6 +42,9 @@ function drop(event: DragEvent) {
     ) as HTMLElement
     ;(<HTMLElement>target)!.appendChild(element)
     element!.id = (<HTMLElement>target)!.id
+
+    let boardState = getState()
+    setState(boardState) // TODO change state
   }
 }
 </script>

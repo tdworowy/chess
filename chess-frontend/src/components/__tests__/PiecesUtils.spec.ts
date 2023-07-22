@@ -13,6 +13,5 @@ describe('Pieces uils', () => {
     expect(pieceColorCondiion(6, 1)).toBe('Light')
     expect(pieceColorCondiion(2, 2)).toBe('')
     expect(pieceColorCondiion(6, 2)).toBe('')
-   
   })
 })

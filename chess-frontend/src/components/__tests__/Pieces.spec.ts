@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import Pieces from '../Pieces.vue'
 
-describe('pieces', () => {
+describe('Pieces component', () => {
   it('renders properly', () => {
     const wrapperBlack = mount(Pieces, {
       propsData: {
