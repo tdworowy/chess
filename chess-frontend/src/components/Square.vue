@@ -37,14 +37,17 @@ function drop(event: DragEvent) {
   const element = document.querySelector(`[id='${targetElementId}'][class*='pawn']`)
 
   if (checkersRules.canMove(startX, startY, endX, endY) && !element) {
+    let boardState = getState()
+
+    boardState[targetElementId!] = boardState[draggableElementId]
+    boardState[draggableElementId] = ''
+    setState(boardState)
+
     const element = document.querySelector(
       `[id='${draggableElementId}'][class*='pawn']`
     ) as HTMLElement
     ;(<HTMLElement>target)!.appendChild(element)
     element!.id = (<HTMLElement>target)!.id
-
-    let boardState = getState()
-    setState(boardState) // TODO change state
   }
 }
 </script>
