@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ChessBoard from './components/ChessBoard.vue'
-import {  provide, ref } from 'vue'
+import { provide, ref } from 'vue'
 
 const boardState = ref({})
 

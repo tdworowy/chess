@@ -26,6 +26,8 @@ function allowDrop(event: DragEvent) {
 }
 
 function drop(event: DragEvent) {
+  let boardState = getState()
+
   const { target } = event
   event.preventDefault()
   const draggableElementId = event.dataTransfer!.getData('id')
@@ -36,9 +38,10 @@ function drop(event: DragEvent) {
 
   const element = document.querySelector(`[id='${targetElementId}'][class*='pawn']`)
 
-  if (checkersRules.canMove(startX, startY, endX, endY) && !element) {
-    let boardState = getState()
-
+  if (
+    (checkersRules.canMove(startX, startY, endX, endY, boardState) && !element) ||
+    checkersRules.canBeat(startX, startY, endX, endY, boardState)
+  ) {
     boardState[targetElementId!] = boardState[draggableElementId]
     boardState[draggableElementId] = ''
     setState(boardState)
