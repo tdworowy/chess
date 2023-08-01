@@ -8,7 +8,8 @@ describe('ChessBoard component', () => {
     const wrapper = mount(ChessBoard, {
       global: {
         provide: {
-          setState: () => {}
+          setState: () => {},
+          getState: () => {}
         }
       }
     })
