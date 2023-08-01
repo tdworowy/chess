@@ -17,7 +17,7 @@ class CheckersRules {
     }
     return false
   }
-
+  // TODO true to often
   canBeat(
     startX: number,
     startY: number,
