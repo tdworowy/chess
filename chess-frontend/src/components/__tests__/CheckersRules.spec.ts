@@ -107,6 +107,7 @@ describe('CheckersRules tests', () => {
     it("test canBeat rule - can't move", () => {
       expect(checkersRules.canBeat(4, 3, 6, 2, newBoard)).to.be.false
       expect(checkersRules.canBeat(4, 3, 5, 1, newBoard)).to.be.false
+      expect(checkersRules.canBeat(5, 2, 4, 4, newBoard)).to.be.false
     })
   })
 })

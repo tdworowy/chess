@@ -17,7 +17,6 @@ class CheckersRules {
     }
     return false
   }
-  // TODO true to often
   canBeat(
     startX: number,
     startY: number,
@@ -27,13 +26,15 @@ class CheckersRules {
   ): boolean {
     const color = boardState[`${startX}_${startY}`]
 
-    if (startX === endX && startY === endY) return false
+    if (startX === endX || startY === endY) return false
     if (color === Color.Dark) {
       const y = startY > endY ? startY - 1 : startY + 1
       if (
         boardState[`${startX + 1}_${y}`] === Color.Light &&
         boardState[`${endX}_${endY}`] === '' &&
-        startX < endX
+        startX < endX &&
+        Math.abs(startY - endY) === 2 &&
+        Math.abs(startX - endX) === 2
       ) {
         return true
       }
@@ -43,7 +44,9 @@ class CheckersRules {
       if (
         boardState[`${startX - 1}_${y}`] === Color.Dark &&
         boardState[`${endX}_${endY}`] === '' &&
-        startX > endX
+        startX > endX &&
+        Math.abs(startY - endY) === 2 &&
+        Math.abs(startX - endX) === 2
       ) {
         return true
       }
