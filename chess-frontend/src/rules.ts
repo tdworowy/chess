@@ -25,9 +25,8 @@ class CheckersRules {
     boardState: { [key: string]: string }
   ): boolean {
     const color = boardState[`${startX}_${startY}`]
-
-    if (color === Color.Dark) {
-      const y = startY > endY ? startY - 1 : startY + 1
+    const y = startY > endY ? startY - 1 : startY + 1
+    if (color === Color.Dark) { 
       if (
         boardState[`${startX + 1}_${y}`] === Color.Light &&
         boardState[`${endX}_${endY}`] === '' &&
@@ -38,7 +37,6 @@ class CheckersRules {
       }
     }
     if (color == Color.Light) {
-      const y = startY > endY ? startY - 1 : startY + 1
       if (
         boardState[`${startX - 1}_${y}`] === Color.Dark &&
         boardState[`${endX}_${endY}`] === '' &&

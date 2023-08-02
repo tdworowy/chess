@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { checkersRules } from '@/rules'
-import type { boardStateType } from '@/types'
+import { Color, type boardStateType } from '@/types'
 import { inject } from 'vue'
 
 const testId = { 'data-testid': 'square' }
@@ -25,6 +25,22 @@ function allowDrop(event: DragEvent) {
   event.preventDefault()
 }
 
+function beat(
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+  boardState: { [key: string]: string }
+) {
+  const color = boardState[`${startX}_${startY}`]
+  const y = startY > endY ? startY - 1 : startY + 1
+  const x = color === Color.Dark ? startX + 1 : startX - 1
+
+  boardState[`${x}_${y}`] = ''
+  document.querySelector(`[id='${x}_${y}'][class*='pawn']`)?.remove()
+  setState(boardState)
+}
+
 function drop(event: DragEvent) {
   let boardState = getState()
 
@@ -37,11 +53,9 @@ function drop(event: DragEvent) {
   const [endX, endY] = targetElementId!.split('_').map((id) => Number(id))
 
   const element = document.querySelector(`[id='${targetElementId}'][class*='pawn']`)
+  const canBeat = checkersRules.canBeat(startX, startY, endX, endY, boardState)
 
-  if (
-    (checkersRules.canMove(startX, startY, endX, endY, boardState) && !element) ||
-    checkersRules.canBeat(startX, startY, endX, endY, boardState)
-  ) {
+  if ((checkersRules.canMove(startX, startY, endX, endY, boardState) && !element) || canBeat) {
     boardState[targetElementId!] = boardState[draggableElementId]
     boardState[draggableElementId] = ''
     setState(boardState)
@@ -51,6 +65,11 @@ function drop(event: DragEvent) {
     ) as HTMLElement
     ;(<HTMLElement>target)!.appendChild(element)
     element!.id = (<HTMLElement>target)!.id
+
+    if (canBeat) {
+      // TODO fix it 
+      beat(startX, startY, endX, endY, boardState)
+    }
   }
 }
 </script>
