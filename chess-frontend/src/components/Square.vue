@@ -26,7 +26,6 @@ function allowDrop(event: DragEvent) {
 }
 
 function beat(
-  // TODO don't work for dark
   startX: number,
   startY: number,
   endX: number,
@@ -36,6 +35,14 @@ function beat(
   const color = boardState[`${startX}_${startY}`]
   const y = startY > endY ? startY - 1 : startY + 1
   const x = color === Color.Dark ? startX + 1 : startX - 1
+
+  console.log(color)
+  console.log(`startX: ${startX}`)
+  console.log(`startY: ${startY}`)
+  console.log(`endX: ${endX}`)
+  console.log(`endY: ${endY}`)
+  console.log(`x: ${x}`)
+  console.log(`y: ${y}`)
 
   boardState[`${x}_${y}`] = ''
   document.querySelector(`[id='${x}_${y}'][class*='pawn']`)?.remove()
@@ -57,19 +64,18 @@ function drop(event: DragEvent) {
   const canBeat = checkersRules.canBeat(startX, startY, endX, endY, boardState)
 
   if ((checkersRules.canMove(startX, startY, endX, endY, boardState) && !element) || canBeat) {
+    if (canBeat) {
+      beat(startX, startY, endX, endY, boardState)
+    }
+
     boardState[targetElementId!] = boardState[draggableElementId]
     boardState[draggableElementId] = ''
-    setState(boardState)
 
     const element = document.querySelector(
       `[id='${draggableElementId}'][class*='pawn']`
     ) as HTMLElement
     ;(<HTMLElement>target)!.appendChild(element)
     element!.id = (<HTMLElement>target)!.id
-
-    if (canBeat) {
-      beat(startX, startY, endX, endY, boardState)
-    }
   }
 }
 </script>
