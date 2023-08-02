@@ -26,6 +26,7 @@ function allowDrop(event: DragEvent) {
 }
 
 function beat(
+  // TODO don't work for dark
   startX: number,
   startY: number,
   endX: number,
@@ -67,7 +68,6 @@ function drop(event: DragEvent) {
     element!.id = (<HTMLElement>target)!.id
 
     if (canBeat) {
-      // TODO fix it 
       beat(startX, startY, endX, endY, boardState)
     }
   }

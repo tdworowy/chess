@@ -31,7 +31,7 @@ class CheckersRules {
         boardState[`${startX + 1}_${y}`] === Color.Light &&
         boardState[`${endX}_${endY}`] === '' &&
         Math.abs(startY - endY) === 2 &&
-        Math.abs(startX - endX) === 2
+        startX - endX === -2
       ) {
         return true
       }
@@ -41,7 +41,7 @@ class CheckersRules {
         boardState[`${startX - 1}_${y}`] === Color.Dark &&
         boardState[`${endX}_${endY}`] === '' &&
         Math.abs(startY - endY) === 2 &&
-        Math.abs(startX - endX) === 2
+        startX - endX === 2
       ) {
         return true
       }
