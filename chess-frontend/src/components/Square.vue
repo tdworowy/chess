@@ -4,8 +4,8 @@ import { Color, type boardStateType } from '@/types'
 import { inject } from 'vue'
 
 const testId = { 'data-testid': 'square' }
-const classWhite = 'square squareBlack'
-const classBlack = ' square squareWhite'
+const classBlack = 'square squareBlack'
+const classWhite = ' square squareWhite'
 
 const setState: boardStateType = <boardStateType>inject('setState')
 const getState = <
@@ -15,34 +15,20 @@ const getState = <
 >inject('getState')
 
 const props = defineProps<{
-  i: number
-  j: number
-  color: String
+  x: number
+  y: number
+  color: Color
 }>()
-const cls: String = props.color === 'black' ? classBlack : classWhite
+const cls: String = props.color === Color.Dark ? classBlack : classWhite
 
 function allowDrop(event: DragEvent) {
   event.preventDefault()
 }
 
-function beat(
-  startX: number,
-  startY: number,
-  endX: number,
-  endY: number,
-  boardState: { [key: string]: string }
-) {
+function beat(startX: number, startY: number, endY: number, boardState: { [key: string]: string }) {
   const color = boardState[`${startX}_${startY}`]
   const y = startY > endY ? startY - 1 : startY + 1
   const x = color === Color.Dark ? startX + 1 : startX - 1
-
-  console.log(color)
-  console.log(`startX: ${startX}`)
-  console.log(`startY: ${startY}`)
-  console.log(`endX: ${endX}`)
-  console.log(`endY: ${endY}`)
-  console.log(`x: ${x}`)
-  console.log(`y: ${y}`)
 
   boardState[`${x}_${y}`] = ''
   document.querySelector(`[id='${x}_${y}'][class*='pawn']`)?.remove()
@@ -65,7 +51,7 @@ function drop(event: DragEvent) {
 
   if ((checkersRules.canMove(startX, startY, endX, endY, boardState) && !element) || canBeat) {
     if (canBeat) {
-      beat(startX, startY, endX, endY, boardState)
+      beat(startX, startY, endY, boardState)
     }
 
     boardState[targetElementId!] = boardState[draggableElementId]
@@ -95,5 +81,5 @@ function drop(event: DragEvent) {
 </style>
 
 <template>
-  <div v-bind="testId" :class="cls" :id="i + '_' + j" v-on:drop="drop" v-on:dragover="allowDrop" />
+  <div v-bind="testId" :class="cls" :id="x + '_' + y" v-on:drop="drop" v-on:dragover="allowDrop" />
 </template>

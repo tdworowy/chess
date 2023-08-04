@@ -3,10 +3,7 @@ import { inject } from 'vue'
 import Pieces from './Pieces.vue'
 import Square from './Square.vue'
 import { pieceColorCondiion } from './piecesUtils'
-import type { boardStateType } from '@/types'
-
-const black = 'black'
-const white = 'white'
+import { Color, type boardStateType } from '@/types'
 
 let boardArray: { [key: string]: string } = {}
 
@@ -47,21 +44,21 @@ li {
       <li v-for="j in 8">
         <div v-if="j % 2 == 0">
           <div v-if="i % 2 == 0">
-            <Square :i="i" :j="j" :color="black" />
+            <Square :x="i" :y="j" :color="Color.Light" />
             <Pieces :x="i" :y="j" />
           </div>
           <div v-else>
-            <Square :i="i" :j="j" :color="white" />
+            <Square :x="i" :y="j" :color="Color.Dark" />
             <Pieces :x="i" :y="j" />
           </div>
         </div>
         <div v-else>
           <div v-if="i % 2 == 0">
-            <Square :i="i" :j="j" :color="white" />
+            <Square :x="i" :y="j" :color="Color.Dark" />
             <Pieces :x="i" :y="j" />
           </div>
           <div v-else>
-            <Square :i="i" :j="j" :color="black" />
+            <Square :x="i" :y="j" :color="Color.Light" />
             <Pieces :x="i" :y="j" />
           </div>
         </div>
