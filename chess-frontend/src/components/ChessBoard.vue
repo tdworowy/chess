@@ -2,7 +2,7 @@
 import { inject } from 'vue'
 import Pieces from './Pieces.vue'
 import Square from './Square.vue'
-import { pieceColorCondiion } from './piecesUtils'
+import { pieceColorCondiion } from './../piecesUtils'
 import { Color, type boardStateType } from '@/types'
 
 let boardArray: { [key: string]: string } = {}

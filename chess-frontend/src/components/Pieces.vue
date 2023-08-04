@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { pieceColorCondiion } from './piecesUtils'
+import { pieceColorCondiion } from './../piecesUtils'
 
 const props = defineProps<{
   x: number

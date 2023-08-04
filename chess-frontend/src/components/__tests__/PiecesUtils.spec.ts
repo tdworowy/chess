@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { pieceColorCondiion, pieceCondition } from '../piecesUtils'
+import { pieceColorCondiion, pieceCondition } from '../../piecesUtils'
 
 describe('Pieces uils', () => {
   it('test pieceCondition', () => {
