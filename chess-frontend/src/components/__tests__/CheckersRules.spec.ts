@@ -1,5 +1,5 @@
-import { describe, expect, it, beforeAll } from 'vitest'
-import { checkersRules } from '../../rules'
+import { describe, expect, it, beforeAll, beforeEach } from 'vitest'
+import { getNewCheckersRules, CheckersRules } from '../../rules'
 import { Color } from '@/types'
 
 const initBoard = {
@@ -70,9 +70,19 @@ const initBoard = {
 }
 
 describe('CheckersRules tests', () => {
+  let checkersRules: CheckersRules
   describe('CheckersRules test canMove', () => {
+    beforeEach(() => {
+      checkersRules = getNewCheckersRules()
+    })
+
     it('test canMove rule - can move dark', () => {
+      checkersRules.nextTurn()
       expect(checkersRules.canMove(3, 2, 4, 3, initBoard)).to.be.true
+    })
+
+    it("test canMove rule - can't move dark first", () => {
+      expect(checkersRules.canMove(3, 2, 4, 3, initBoard)).to.be.false
     })
 
     it('test canMove rule - can move light', () => {
@@ -96,11 +106,16 @@ describe('CheckersRules tests', () => {
       newBoard['4_3'] = Color.Dark
     })
 
+    beforeEach(() => {
+      checkersRules = getNewCheckersRules()
+    })
+
     it('test canBeat rule - can move light', () => {
       expect(checkersRules.canBeat(5, 2, 3, 4, newBoard)).to.be.true
     })
 
     it('test canBeat rule - can move dark', () => {
+      checkersRules.nextTurn()
       expect(checkersRules.canBeat(4, 3, 6, 1, newBoard)).to.be.true
     })
 

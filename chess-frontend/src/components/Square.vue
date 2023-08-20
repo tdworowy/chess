@@ -62,6 +62,8 @@ function drop(event: DragEvent) {
     ) as HTMLElement
     ;(<HTMLElement>target)!.appendChild(element)
     element!.id = (<HTMLElement>target)!.id
+
+    checkersRules.nextTurn()
   }
 }
 </script>

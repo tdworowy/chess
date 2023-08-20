@@ -1,6 +1,8 @@
 import { Color } from './types'
 
-class CheckersRules {
+export class CheckersRules {
+  currentTurnColor = Color.Light
+  nextTurnColor = Color.Dark
   canMove(
     startX: number,
     startY: number,
@@ -9,6 +11,8 @@ class CheckersRules {
     boardState: { [key: string]: string }
   ): boolean {
     const color = boardState[`${startX}_${startY}`]
+    if (color !== this.currentTurnColor) return false
+
     if (color === Color.Dark) {
       return startX - endX === -1 && Math.abs(startY - endY) === 1
     }
@@ -17,6 +21,7 @@ class CheckersRules {
     }
     return false
   }
+
   canBeat(
     startX: number,
     startY: number,
@@ -25,6 +30,8 @@ class CheckersRules {
     boardState: { [key: string]: string }
   ): boolean {
     const color = boardState[`${startX}_${startY}`]
+    if (color !== this.currentTurnColor) return false
+
     const y = startY > endY ? startY - 1 : startY + 1
     if (color === Color.Dark) {
       if (
@@ -48,6 +55,14 @@ class CheckersRules {
     }
     return false
   }
-}
 
+  nextTurn() {
+    const temp = this.currentTurnColor
+    this.currentTurnColor = this.nextTurnColor
+    this.nextTurnColor = temp
+  }
+}
+export const getNewCheckersRules = () => {
+  return new CheckersRules()
+}
 export const checkersRules = new CheckersRules()
