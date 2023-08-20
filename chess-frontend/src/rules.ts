@@ -1,42 +1,57 @@
-import { Color } from './types'
+import { Color, PawnType } from './types'
+
+class PawnsMoveRules {
+  [PawnType.PawnDark](startX: number, startY: number, endX: number, endY: number) {
+    return startX - endX === -1 && Math.abs(startY - endY) === 1
+  }
+
+  [PawnType.PawnLight](startX: number, startY: number, endX: number, endY: number) {
+    return startX - endX === 1 && Math.abs(startY - endY) === 1
+  }
+
+  [PawnType.Dame](startX: number, startY: number, endX: number, endY: number) {
+    return Math.abs(startX - endX) === 1 && Math.abs(startY - endY) === 1
+  }
+
+  [PawnType.Empty]() {
+    return false
+  }
+}
 
 export class CheckersRules {
   currentTurnColor = Color.Light
   nextTurnColor = Color.Dark
+  pawnsMoveRules: PawnsMoveRules = new PawnsMoveRules()
+
   canMove(
     startX: number,
     startY: number,
     endX: number,
     endY: number,
-    boardState: { [key: string]: string }
+    boardState: { [key: string]: [Color, PawnType] }
   ): boolean {
-    const color = boardState[`${startX}_${startY}`]
+    const color = boardState[`${startX}_${startY}`][0]
+    const pawnType: PawnType = boardState[`${startX}_${startY}`][1]
     if (color !== this.currentTurnColor) return false
-
-    if (color === Color.Dark) {
-      return startX - endX === -1 && Math.abs(startY - endY) === 1
-    }
-    if (color == Color.Light) {
-      return startX - endX === 1 && Math.abs(startY - endY) === 1
-    }
-    return false
+    return this.pawnsMoveRules[pawnType](startX, startY, endX, endY)
   }
 
+  // TODO hadnle dame
   canBeat(
     startX: number,
     startY: number,
     endX: number,
     endY: number,
-    boardState: { [key: string]: string }
+    boardState: { [key: string]: [Color, PawnType] }
   ): boolean {
-    const color = boardState[`${startX}_${startY}`]
+    const color = boardState[`${startX}_${startY}`][0]
     if (color !== this.currentTurnColor) return false
 
     const y = startY > endY ? startY - 1 : startY + 1
     if (color === Color.Dark) {
       if (
-        boardState[`${startX + 1}_${y}`] === Color.Light &&
-        boardState[`${endX}_${endY}`] === '' &&
+        boardState[`${startX + 1}_${y}`][0] === Color.Light &&
+        boardState[`${endX}_${endY}`][0] === '' &&
         Math.abs(startY - endY) === 2 &&
         startX - endX === -2
       ) {
@@ -45,8 +60,8 @@ export class CheckersRules {
     }
     if (color == Color.Light) {
       if (
-        boardState[`${startX - 1}_${y}`] === Color.Dark &&
-        boardState[`${endX}_${endY}`] === '' &&
+        boardState[`${startX - 1}_${y}`][0] === Color.Dark &&
+        boardState[`${endX}_${endY}`][0] === '' &&
         Math.abs(startY - endY) === 2 &&
         startX - endX === 2
       ) {
@@ -62,7 +77,9 @@ export class CheckersRules {
     this.nextTurnColor = temp
   }
 }
+
 export const getNewCheckersRules = () => {
   return new CheckersRules()
 }
+
 export const checkersRules = new CheckersRules()

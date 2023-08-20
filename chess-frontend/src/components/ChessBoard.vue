@@ -3,9 +3,9 @@ import { inject } from 'vue'
 import Pieces from './Pieces.vue'
 import Square from './Square.vue'
 import { pieceColorCondiion } from './../piecesUtils'
-import { Color, type boardStateType } from '@/types'
+import { Color, PawnType, type boardStateType } from '@/types'
 
-let boardArray: { [key: string]: string } = {}
+let boardArray: { [key: string]: [Color, PawnType] } = {}
 
 for (let i = 1; i <= 8; i++) {
   for (let j = 1; j <= 8; j++) {

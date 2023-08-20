@@ -1,72 +1,72 @@
 import { describe, expect, it, beforeAll, beforeEach } from 'vitest'
 import { getNewCheckersRules, CheckersRules } from '../../rules'
-import { Color } from '@/types'
+import { Color, PawnType } from '@/types'
 
-const initBoard = {
-  '1_1': '',
-  '1_2': Color.Dark,
-  '1_3': '',
-  '1_4': Color.Dark,
-  '1_5': '',
-  '1_6': Color.Dark,
-  '1_7': '',
-  '1_8': Color.Dark,
-  '2_1': Color.Dark,
-  '2_2': '',
-  '2_3': Color.Dark,
-  '2_4': '',
-  '2_5': Color.Dark,
-  '2_6': '',
-  '2_7': Color.Dark,
-  '2_8': '',
-  '3_1': '',
-  '3_2': Color.Dark,
-  '3_3': '',
-  '3_4': Color.Dark,
-  '3_5': '',
-  '3_6': Color.Dark,
-  '3_7': '',
-  '3_8': Color.Dark,
-  '4_1': '',
-  '4_2': '',
-  '4_3': '',
-  '4_4': '',
-  '4_5': '',
-  '4_6': '',
-  '4_7': '',
-  '4_8': '',
-  '5_1': '',
-  '5_2': '',
-  '5_3': '',
-  '5_4': '',
-  '5_5': '',
-  '5_6': '',
-  '5_7': '',
-  '5_8': '',
-  '6_1': Color.Light,
-  '6_2': '',
-  '6_3': Color.Light,
-  '6_4': '',
-  '6_5': Color.Light,
-  '6_6': '',
-  '6_7': Color.Light,
-  '6_8': '',
-  '7_1': '',
-  '7_2': Color.Light,
-  '7_3': '',
-  '7_4': Color.Light,
-  '7_5': '',
-  '7_6': Color.Light,
-  '7_7': '',
-  '7_8': Color.Light,
-  '8_1': Color.Light,
-  '8_2': '',
-  '8_3': Color.Light,
-  '8_4': '',
-  '8_5': Color.Light,
-  '8_6': '',
-  '8_7': Color.Light,
-  '8_8': ''
+const initBoard: { [key: string]: [Color, PawnType] } = {
+  '1_1': [Color.Empty, PawnType.Empty],
+  '1_2': [Color.Dark, PawnType.PawnDark],
+  '1_3': [Color.Empty, PawnType.Empty],
+  '1_4': [Color.Dark, PawnType.PawnDark],
+  '1_5': [Color.Empty, PawnType.Empty],
+  '1_6': [Color.Dark, PawnType.PawnDark],
+  '1_7': [Color.Empty, PawnType.Empty],
+  '1_8': [Color.Dark, PawnType.PawnDark],
+  '2_1': [Color.Dark, PawnType.PawnDark],
+  '2_2': [Color.Empty, PawnType.Empty],
+  '2_3': [Color.Dark, PawnType.PawnDark],
+  '2_4': [Color.Empty, PawnType.Empty],
+  '2_5': [Color.Dark, PawnType.PawnDark],
+  '2_6': [Color.Empty, PawnType.Empty],
+  '2_7': [Color.Dark, PawnType.PawnDark],
+  '2_8': [Color.Empty, PawnType.Empty],
+  '3_1': [Color.Empty, PawnType.Empty],
+  '3_2': [Color.Dark, PawnType.PawnDark],
+  '3_3': [Color.Empty, PawnType.Empty],
+  '3_4': [Color.Dark, PawnType.PawnDark],
+  '3_5': [Color.Empty, PawnType.Empty],
+  '3_6': [Color.Dark, PawnType.PawnDark],
+  '3_7': [Color.Empty, PawnType.Empty],
+  '3_8': [Color.Dark, PawnType.PawnDark],
+  '4_1': [Color.Empty, PawnType.Empty],
+  '4_2': [Color.Empty, PawnType.Empty],
+  '4_3': [Color.Empty, PawnType.Empty],
+  '4_4': [Color.Empty, PawnType.Empty],
+  '4_5': [Color.Empty, PawnType.Empty],
+  '4_6': [Color.Empty, PawnType.Empty],
+  '4_7': [Color.Empty, PawnType.Empty],
+  '4_8': [Color.Empty, PawnType.Empty],
+  '5_1': [Color.Empty, PawnType.Empty],
+  '5_2': [Color.Empty, PawnType.Empty],
+  '5_3': [Color.Empty, PawnType.Empty],
+  '5_4': [Color.Empty, PawnType.Empty],
+  '5_5': [Color.Empty, PawnType.Empty],
+  '5_6': [Color.Empty, PawnType.Empty],
+  '5_7': [Color.Empty, PawnType.Empty],
+  '5_8': [Color.Empty, PawnType.Empty],
+  '6_1': [Color.Light, PawnType.PawnLight],
+  '6_2': [Color.Empty, PawnType.Empty],
+  '6_3': [Color.Dark, PawnType.PawnLight],
+  '6_4': [Color.Empty, PawnType.Empty],
+  '6_5': [Color.Light, PawnType.PawnLight],
+  '6_6': [Color.Empty, PawnType.Empty],
+  '6_7': [Color.Light, PawnType.PawnLight],
+  '6_8': [Color.Empty, PawnType.Empty],
+  '7_1': [Color.Empty, PawnType.Empty],
+  '7_2': [Color.Light, PawnType.PawnLight],
+  '7_3': [Color.Empty, PawnType.Empty],
+  '7_4': [Color.Light, PawnType.PawnLight],
+  '7_5': [Color.Empty, PawnType.Empty],
+  '7_6': [Color.Light, PawnType.PawnLight],
+  '7_7': [Color.Empty, PawnType.Empty],
+  '7_8': [Color.Light, PawnType.PawnLight],
+  '8_1': [Color.Light, PawnType.PawnLight],
+  '8_2': [Color.Empty, PawnType.Empty],
+  '8_3': [Color.Light, PawnType.PawnLight],
+  '8_4': [Color.Empty, PawnType.Empty],
+  '8_5': [Color.Light, PawnType.PawnLight],
+  '8_6': [Color.Empty, PawnType.Empty],
+  '8_7': [Color.Light, PawnType.PawnLight],
+  '8_8': [Color.Empty, PawnType.Empty]
 }
 
 describe('CheckersRules tests', () => {
@@ -96,14 +96,14 @@ describe('CheckersRules tests', () => {
   })
 
   describe('CheckersRules test canBeat', () => {
-    let newBoard: { [key: string]: string }
+    let newBoard: { [key: string]: [Color, PawnType] }
 
     beforeAll(() => {
       newBoard = Object.assign({}, initBoard)
-      newBoard['6_1'] = ''
-      newBoard['5_2'] = Color.Light
-      newBoard['3_4'] = ''
-      newBoard['4_3'] = Color.Dark
+      newBoard['6_1'] = [Color.Empty, PawnType.Empty]
+      newBoard['5_2'] = [Color.Light, PawnType.PawnLight]
+      newBoard['3_4'] = [Color.Empty, PawnType.Empty]
+      newBoard['4_3'] = [Color.Dark, PawnType.PawnDark]
     })
 
     beforeEach(() => {
@@ -128,7 +128,7 @@ describe('CheckersRules tests', () => {
 
     it("test canBeat rule - can't move - go back", () => {
       newBoard = Object.assign({}, initBoard)
-      newBoard['3_4'] = Color.Light
+      newBoard['3_4'] = [Color.Light, PawnType.PawnLight]
 
       expect(checkersRules.canBeat(3, 4, 5, 2, newBoard)).to.be.false
     })

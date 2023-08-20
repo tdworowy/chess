@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { checkersRules } from '@/rules'
-import { Color, type boardStateType } from '@/types'
+import { Color, PawnType, type boardStateType } from '@/types'
 import { inject } from 'vue'
 
 const testId = { 'data-testid': 'square' }
@@ -10,7 +10,7 @@ const classWhite = ' square squareWhite'
 const setState: boardStateType = <boardStateType>inject('setState')
 const getState = <
   () => {
-    [key: string]: string
+    [key: string]: [Color, PawnType]
   }
 >inject('getState')
 
@@ -24,13 +24,18 @@ const cls: String = props.color === Color.Dark ? classBlack : classWhite
 function allowDrop(event: DragEvent) {
   event.preventDefault()
 }
-
-function beat(startX: number, startY: number, endY: number, boardState: { [key: string]: string }) {
-  const color = boardState[`${startX}_${startY}`]
+// TODO handle DAME
+function beat(
+  startX: number,
+  startY: number,
+  endY: number,
+  boardState: { [key: string]: [Color, PawnType] }
+) {
+  const color = boardState[`${startX}_${startY}`][0]
   const y = startY > endY ? startY - 1 : startY + 1
   const x = color === Color.Dark ? startX + 1 : startX - 1
 
-  boardState[`${x}_${y}`] = ''
+  boardState[`${x}_${y}`] = [Color.Empty, PawnType.Empty]
   document.querySelector(`[id='${x}_${y}'][class*='pawn']`)?.remove()
   setState(boardState)
 }
@@ -55,7 +60,7 @@ function drop(event: DragEvent) {
     }
 
     boardState[targetElementId!] = boardState[draggableElementId]
-    boardState[draggableElementId] = ''
+    boardState[draggableElementId] = [Color.Empty, PawnType.Empty]
 
     const element = document.querySelector(
       `[id='${draggableElementId}'][class*='pawn']`

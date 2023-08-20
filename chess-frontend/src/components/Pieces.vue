@@ -1,4 +1,7 @@
+
 <script setup lang="ts">
+// TODO handle DAME
+import { Color } from '@/types'
 import { pieceColorCondiion } from './../piecesUtils'
 
 const props = defineProps<{
@@ -6,7 +9,7 @@ const props = defineProps<{
   y: number
 }>()
 
-const color = pieceColorCondiion(props.x, props.y)
+const color = pieceColorCondiion(props.x, props.y)[0]
 
 const pawnDark = 'pawn pawnDark'
 const pawnLight = 'pawn pawnLight'
@@ -40,7 +43,7 @@ function drag(event: DragEvent) {
 
 <template>
   <div
-    v-if="color === 'Dark'"
+    v-if="color === Color.Dark"
     :id="x + '_' + y"
     :class="pawnDark"
     v-bind="testId"
@@ -48,7 +51,7 @@ function drag(event: DragEvent) {
     v-on:dragstart="drag"
   ></div>
   <div
-    v-if="color === 'Light'"
+    v-if="color === Color.Light"
     :id="x + '_' + y"
     :class="pawnLight"
     v-bind="testId"
