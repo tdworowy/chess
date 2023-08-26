@@ -19,7 +19,8 @@ class PawnsMoveRules {
 }
 
 class PawnsBeatRules {
-  private checkIfPawnOnDiagonal(
+  // TODO to rewrite need to check X up and nawn and Y up and donw 
+  private checkIfPawnOnDiagonalUp(
     startX: number,
     startY: number,
     endX: number,
@@ -27,13 +28,33 @@ class PawnsBeatRules {
     boardState: { [key: string]: [Color, PawnType] }
   ) {
     let j = startY + 1
-    for (let i = startX + 1; i++; i < endX) {
+    let pawnsFind = 0
+    for (let i = startX + 1; i < endX; i++) {
+      console.log(`${i}_${j}`)
       if (boardState[`${i}_${j}`][0] === color) {
-        return true
+        pawnsFind++
       }
       j++
     }
-    return false
+    return pawnsFind === 1
+  }
+  private checkIfPawnOnDiagonalDown(
+    startX: number,
+    startY: number,
+    endX: number,
+    color: Color,
+    boardState: { [key: string]: [Color, PawnType] }
+  ) {
+    let j = startY - 1
+    let pawnsFind = 0
+    for (let i = startX - 1; i > endX; i--) {
+      console.log(`${i}_${j}`)
+      if (boardState[`${i}_${j}`][0] === color) {
+        pawnsFind++
+      }
+      j--
+    }
+    return  pawnsFind === 1
   }
   [PawnType.PawnDark](
     startX: number,
@@ -44,7 +65,7 @@ class PawnsBeatRules {
     boardState: { [key: string]: [Color, PawnType] }
   ) {
     return (
-      boardState[`${endX}_${endY}`][0] === '' &&
+      boardState[`${endX}_${endY}`][0] === Color.Empty &&
       boardState[`${startX + 1}_${y}`][0] === Color.Light &&
       Math.abs(startY - endY) === 2 &&
       startX - endX === -2
@@ -60,7 +81,7 @@ class PawnsBeatRules {
     boardState: { [key: string]: [Color, PawnType] }
   ) {
     return (
-      boardState[`${endX}_${endY}`][0] === '' &&
+      boardState[`${endX}_${endY}`][0] === Color.Empty &&
       boardState[`${startX - 1}_${y}`][0] === Color.Dark &&
       Math.abs(startY - endY) === 2 &&
       startX - endX === 2
@@ -75,18 +96,26 @@ class PawnsBeatRules {
     y: number,
     boardState: { [key: string]: [Color, PawnType] }
   ) {
+    const opposedColor = boardState[`${startX}_${startY}`][0] === Color.Dark ? Color.Light : Color.Dark
     return (
-      boardState[`${endX}_${endY}`][0] === '' &&
+      boardState[`${endX}_${endY}`][0] === Color.Empty &&
       startX !== endX &&
       startY !== endY &&
       Math.abs(startY - endY) == Math.abs(startX - endX) &&
-      this.checkIfPawnOnDiagonal(
+      (this.checkIfPawnOnDiagonalUp(
         startX,
         startY,
         endX,
-        boardState[`${startX}_${startY}`][0] === Color.Dark ? Color.Light : Color.Dark,
+        opposedColor,
         boardState
-      )
+      ) ||
+        this.checkIfPawnOnDiagonalDown(
+          startX,
+          startY,
+          endX,
+          opposedColor,
+          boardState
+        ))
     )
   }
 
