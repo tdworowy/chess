@@ -19,8 +19,7 @@ class PawnsMoveRules {
 }
 
 class PawnsBeatRules {
-  // TODO to rewrite, it dosen't check diagonally
-  private checkIfPawnOnDiagonalUp(
+  private checkIfPawnOnDiagonalDownLeft(
     startX: number,
     startY: number,
     endX: number,
@@ -38,7 +37,25 @@ class PawnsBeatRules {
     }
     return pawnsFind === 1
   }
-  private checkIfPawnOnDiagonalDown(
+  private checkIfPawnOnDiagonalDownRight(
+    startX: number,
+    startY: number,
+    endX: number,
+    color: Color,
+    boardState: { [key: string]: [Color, PawnType] }
+  ) {
+    let j = startY - 1
+    let pawnsFind = 0
+    for (let i = startX + 1; i < endX; i++) {
+      console.log(`${i}_${j}`)
+      if (boardState[`${i}_${j}`][0] === color) {
+        pawnsFind++
+      }
+      j--
+    }
+    return pawnsFind === 1
+  }
+  private checkIfPawnOnDiagonalUpRight(
     startX: number,
     startY: number,
     endX: number,
@@ -54,7 +71,25 @@ class PawnsBeatRules {
       }
       j--
     }
-    return  pawnsFind === 1
+    return pawnsFind === 1
+  }
+  private checkIfPawnOnDiagonalUpLeft(
+    startX: number,
+    startY: number,
+    endX: number,
+    color: Color,
+    boardState: { [key: string]: [Color, PawnType] }
+  ) {
+    let j = startY + 1
+    let pawnsFind = 0
+    for (let i = startX - 1; i > endX; i--) {
+      console.log(`${i}_${j}`)
+      if (boardState[`${i}_${j}`][0] === color) {
+        pawnsFind++
+      }
+      j++
+    }
+    return pawnsFind === 1
   }
   [PawnType.PawnDark](
     startX: number,
@@ -96,26 +131,17 @@ class PawnsBeatRules {
     y: number,
     boardState: { [key: string]: [Color, PawnType] }
   ) {
-    const opposedColor = boardState[`${startX}_${startY}`][0] === Color.Dark ? Color.Light : Color.Dark
+    const opposedColor =
+      boardState[`${startX}_${startY}`][0] === Color.Dark ? Color.Light : Color.Dark
     return (
       boardState[`${endX}_${endY}`][0] === Color.Empty &&
       startX !== endX &&
       startY !== endY &&
       Math.abs(startY - endY) == Math.abs(startX - endX) &&
-      (this.checkIfPawnOnDiagonalUp(
-        startX,
-        startY,
-        endX,
-        opposedColor,
-        boardState
-      ) ||
-        this.checkIfPawnOnDiagonalDown(
-          startX,
-          startY,
-          endX,
-          opposedColor,
-          boardState
-        ))
+      (this.checkIfPawnOnDiagonalDownLeft(startX, startY, endX, opposedColor, boardState) ||
+        this.checkIfPawnOnDiagonalUpRight(startX, startY, endX, opposedColor, boardState) ||
+        this.checkIfPawnOnDiagonalUpLeft(startX, startY, endX, opposedColor, boardState) ||
+        this.checkIfPawnOnDiagonalDownRight(startX, startY, endX, opposedColor, boardState))
     )
   }
 
@@ -143,7 +169,6 @@ export class CheckersRules {
     return this.pawnsMoveRules[pawnType](startX, startY, endX, endY)
   }
 
-  // TODO hadnle dame
   canBeat(
     startX: number,
     startY: number,

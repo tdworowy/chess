@@ -167,7 +167,7 @@ describe('CheckersRules tests', () => {
         '4_2': [Color.Empty, PawnType.Empty],
         '4_3': [Color.Empty, PawnType.Empty],
         '4_4': [Color.Empty, PawnType.Empty],
-        '4_5': [Color.Empty, PawnType.Empty],
+        '4_5': [Color.Dark, PawnType.PawnDark],
         '4_6': [Color.Empty, PawnType.Empty],
         '4_7': [Color.Empty, PawnType.Empty],
         '4_8': [Color.Empty, PawnType.Empty],
@@ -181,7 +181,7 @@ describe('CheckersRules tests', () => {
         '5_8': [Color.Empty, PawnType.Empty],
         '6_1': [Color.Empty, PawnType.Empty],
         '6_2': [Color.Empty, PawnType.Empty],
-        '6_3': [Color.Empty, PawnType.Empty],
+        '6_3': [Color.Light, PawnType.Dame],
         '6_4': [Color.Empty, PawnType.Empty],
         '6_5': [Color.Empty, PawnType.Empty],
         '6_6': [Color.Empty, PawnType.Empty],
@@ -210,14 +210,14 @@ describe('CheckersRules tests', () => {
       checkersRules = getNewCheckersRules()
     })
 
-    // it('test canBeat rule - can move light', () => {
-    //   expect(checkersRules.canBeat(5, 2, 3, 4, newBoard)).to.be.true
-    // }) // TODO test to rewrite
-
-    it.skip('test canBeat rule - can move dark', () => {
+    it('test canBeat rule - can move light', () => {
+      expect(checkersRules.canBeat(6, 3, 3, 6, newBoard)).to.be.true
+    })
+     
+    it('test canBeat rule - can move dark', () => {
       checkersRules.nextTurn()
       expect(checkersRules.canBeat(3, 4, 6, 1, newBoard)).to.be.true
-    }) // TODO correct test, functionality doesn't work
+    })
 
     it("test canBeat rule - can't move", () => {
       expect(checkersRules.canBeat(4, 3, 6, 2, newBoard)).to.be.false
@@ -225,12 +225,5 @@ describe('CheckersRules tests', () => {
       expect(checkersRules.canBeat(5, 2, 4, 4, newBoard)).to.be.false
       expect(checkersRules.canBeat(5, 2, 4, 4, newBoard)).to.be.false
     })
-
-    // it("test canBeat rule - can't move - go back", () => {
-    //   newBoard = Object.assign({}, initBoard)
-    //   newBoard['3_4'] = [Color.Light, PawnType.PawnLight]
-
-    //   expect(checkersRules.canBeat(3, 4, 5, 2, newBoard)).to.be.false
-    // }) // TODO test to rewrite
   })
 })
