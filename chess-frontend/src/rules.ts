@@ -19,7 +19,7 @@ class PawnsMoveRules {
 }
 
 class PawnsBeatRules {
-  // TODO to rewrite need to check X up and nawn and Y up and donw 
+  // TODO to rewrite, it dosen't check diagonally
   private checkIfPawnOnDiagonalUp(
     startX: number,
     startY: number,
