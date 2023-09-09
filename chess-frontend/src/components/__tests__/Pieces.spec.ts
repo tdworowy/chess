@@ -4,7 +4,7 @@ import { mount } from '@vue/test-utils'
 import Pieces from '../Pieces.vue'
 
 describe('Pieces component', () => {
-  it('renders properly', () => {
+  it('renders properly - Pawns', () => {
     const wrapperBlack = mount(Pieces, {
       propsData: {
         x: 1,

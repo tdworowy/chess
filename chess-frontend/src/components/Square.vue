@@ -68,6 +68,12 @@ function drop(event: DragEvent) {
     ;(<HTMLElement>target)!.appendChild(element)
     element!.id = (<HTMLElement>target)!.id
 
+    if (checkersRules.canBecomeDame(endX, endY, boardState)) {
+      element.classList.add('dame')
+      boardState[targetElementId!][1] = PawnType.Dame
+    }
+
+    setState(boardState)
     checkersRules.nextTurn()
   }
 }

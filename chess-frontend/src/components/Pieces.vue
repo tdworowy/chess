@@ -1,6 +1,5 @@
 <script setup lang="ts">
-// TODO handle DAME
-import { Color } from '@/types'
+import { Color, PawnType } from '@/types'
 import { pieceColorCondiion } from './../piecesUtils'
 
 const props = defineProps<{
@@ -10,8 +9,8 @@ const props = defineProps<{
 
 const color = pieceColorCondiion(props.x, props.y)[0]
 
-const pawnDark = 'pawn pawnDark'
-const pawnLight = 'pawn pawnLight'
+const pawnDark = `pawn ${PawnType.PawnDark}`
+const pawnLight = `pawn ${PawnType.PawnLight}`
 
 const testId = { 'data-testid': 'pawn' }
 
@@ -37,6 +36,12 @@ function drag(event: DragEvent) {
 }
 .pawnLight {
   background-color: #67c964;
+}
+.dame.pawnDark {
+  background-color: #270303;
+}
+.dame.pawnLight {
+  background-color: #163315;
 }
 </style>
 

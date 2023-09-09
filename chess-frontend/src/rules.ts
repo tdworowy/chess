@@ -10,7 +10,7 @@ class PawnsMoveRules {
   }
 
   [PawnType.Dame](startX: number, startY: number, endX: number, endY: number) {
-    return Math.abs(startX - endX) === 1 && Math.abs(startY - endY) === 1
+    return Math.abs(startX - endX) === Math.abs(startY - endY)
   }
 
   [PawnType.Empty]() {
@@ -29,7 +29,6 @@ class PawnsBeatRules {
     let j = startY + 1
     let pawnsFind = 0
     for (let i = startX + 1; i < endX; i++) {
-      console.log(`${i}_${j}`)
       if (boardState[`${i}_${j}`][0] === color) {
         pawnsFind++
       }
@@ -47,7 +46,6 @@ class PawnsBeatRules {
     let j = startY - 1
     let pawnsFind = 0
     for (let i = startX + 1; i < endX; i++) {
-      console.log(`${i}_${j}`)
       if (boardState[`${i}_${j}`][0] === color) {
         pawnsFind++
       }
@@ -65,7 +63,6 @@ class PawnsBeatRules {
     let j = startY - 1
     let pawnsFind = 0
     for (let i = startX - 1; i > endX; i--) {
-      console.log(`${i}_${j}`)
       if (boardState[`${i}_${j}`][0] === color) {
         pawnsFind++
       }
@@ -188,6 +185,17 @@ export class CheckersRules {
     const temp = this.currentTurnColor
     this.currentTurnColor = this.nextTurnColor
     this.nextTurnColor = temp
+  }
+
+  canBecomeDame(x: number, y: number, boardState: { [key: string]: [Color, PawnType] }) {
+    return (
+      (x === 8 &&
+        boardState[`${x}_${y}`][0] === Color.Dark &&
+        boardState[`${x}_${y}`][1] === PawnType.PawnDark) ||
+      (x === 1 &&
+        boardState[`${x}_${y}`][0] === Color.Light &&
+        boardState[`${x}_${y}`][1] === PawnType.PawnLight)
+    )
   }
 }
 
