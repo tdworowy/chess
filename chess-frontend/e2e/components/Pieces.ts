@@ -1,10 +1,10 @@
 import { Page } from 'playwright-core'
 import { expect } from '@playwright/test'
 
-class Pieces {
+export class Pieces {
   page!: Page
 
-  constructor(page: Page) {
+  private constructor(page: Page) {
     this.page = page
   }
 
@@ -21,8 +21,8 @@ class Pieces {
     const pawns = this.page.getByTestId(this.testId.pawn)
     await expect(pawns).toHaveCount(24)
   }
-}
 
-export const getPieces = (page: Page) => {
-  return new Pieces(page)
+  static getPieces(page: Page) {
+    return new Pieces(page)
+  }
 }

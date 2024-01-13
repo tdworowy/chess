@@ -1,11 +1,14 @@
 import { Page } from 'playwright-core'
 import { expect } from '@playwright/test'
+import { Pieces } from './Pieces'
 
-class ChessBoard {
+export class ChessBoard {
   page!: Page
+  pieces!: Pieces
 
-  constructor(page: Page) {
+  private constructor(page: Page) {
     this.page = page
+    this.pieces = Pieces.getPieces(page)
   }
 
   classes = {
@@ -46,8 +49,15 @@ class ChessBoard {
       }
     }
   }
-}
 
-export const getChaseBoard = (page: Page) => {
-  return new ChessBoard(page)
+  async dragPiceToSquare(piceId: string, squareId: string) {
+    let pawn = this.page.locator(`[id="${piceId}"][data-testid='${this.pieces.testId.pawn}']`)
+    let square = this.page.locator(`[id="${squareId}"][data-testid='${this.testId.square}']`)
+
+    await pawn.dragTo(square)
+  }
+
+  static getChaseBoard(page: Page) {
+    return new ChessBoard(page)
+  }
 }
