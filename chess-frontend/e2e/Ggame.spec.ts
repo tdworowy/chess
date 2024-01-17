@@ -7,6 +7,6 @@ test.describe('Game of checkers', () => {
     await page.goto('/')
     let chaseBoard = ChessBoard.getChaseBoard(page)
     await chaseBoard.dragPiceToSquare('6_1', '5_2')
-    // TODO add assertion
+    await chaseBoard.assertPiceOnSquare('5_2')
   })
 })

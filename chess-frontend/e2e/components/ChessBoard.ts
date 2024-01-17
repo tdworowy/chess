@@ -57,6 +57,13 @@ export class ChessBoard {
     await pawn.dragTo(square)
   }
 
+  async assertPiceOnSquare(id: string) {
+    let pawnCss = `[id="${id}"][data-testid='${this.pieces.testId.pawn}']`
+    let square = this.page.locator(`[id="${id}"][data-testid='${this.testId.square}']`)
+
+    await expect(square.locator(pawnCss)).toBeVisible()
+  }
+
   static getChaseBoard(page: Page) {
     return new ChessBoard(page)
   }
