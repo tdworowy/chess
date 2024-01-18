@@ -8,12 +8,12 @@ export class Pieces {
     this.page = page
   }
 
-  classes = {
+  readonly classes = {
     pawnBlack: '.pawnBlack',
     pawnWhite: '.pawnWhite'
   }
 
-  testId = {
+  readonly testId = {
     pawn: 'pawn'
   }
 

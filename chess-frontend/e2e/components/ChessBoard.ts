@@ -11,12 +11,12 @@ export class ChessBoard {
     this.pieces = Pieces.getPieces(page)
   }
 
-  classes = {
+  readonly classes = {
     squareBlack: '.squareBlack',
     squareWhite: '.squareBlack'
   }
 
-  testId = {
+  readonly testId = {
     square: 'square'
   }
 
