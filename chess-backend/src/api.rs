@@ -1,5 +1,6 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Debug)]
 enum Player {
@@ -19,24 +20,14 @@ enum PawnType {
     Dame,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct BoardState {
-    id: String,
-    content: (PawnColor, PawnType),
-}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GameState {
     player: Player,
-    board_state: Vec<BoardState>,
+    board_state: HashMap<String, (PawnColor, PawnType)>,
 }
 
-// #[derive(Serialize, Deserialize, Debug)]
-// pub struct GameState {
-//     player: String,
-//     board_state: HashMap<String, (String, String)>,
-// }
-// TODO something  not right with structs
+//TODO don't work, issue with HashMap ?
 #[post("/make_move")]
 pub async fn make_move(game_state: web::Json<GameState>) -> impl Responder {
     let game_state = game_state.into_inner();
@@ -49,6 +40,23 @@ pub async fn make_move(game_state: web::Json<GameState>) -> impl Responder {
         }
     }
 }
+
+#[get("/get_example")]
+pub async fn get_example() -> impl Responder {
+    let game_state = GameState {
+        player: Player::Black,
+        board_state: HashMap::from([("1_1".to_owned(), (PawnColor::Black, PawnType::Pawn))]),
+    };
+    match serde_json::to_string(&game_state) {
+        Ok(game_state_json) => HttpResponse::Ok().json(game_state_json),
+        Err(error) => {
+            eprintln!("{:?}", error);
+            HttpResponse::InternalServerError()
+                .body(format!("get_example Error: {:?}", error.to_string()))
+        }
+    }
+}
+//"{\"player\":\"Black\",\"board_state\":{\"1_1\":[\"Black\",\"Pawn\"]}}"
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Healthcheck {
