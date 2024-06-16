@@ -20,14 +20,18 @@ enum PawnType {
     Dame,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct FieldState {
+    pawn_color: PawnColor,
+    pawn_type: PawnType,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GameState {
     player: Player,
-    board_state: HashMap<String, (PawnColor, PawnType)>,
+    board_state: HashMap<String, FieldState>,
 }
 
-//TODO don't work, issue with HashMap ?
 #[post("/make_move")]
 pub async fn make_move(game_state: web::Json<GameState>) -> impl Responder {
     let game_state = game_state.into_inner();
@@ -45,7 +49,13 @@ pub async fn make_move(game_state: web::Json<GameState>) -> impl Responder {
 pub async fn get_example() -> impl Responder {
     let game_state = GameState {
         player: Player::Black,
-        board_state: HashMap::from([("1_1".to_owned(), (PawnColor::Black, PawnType::Pawn))]),
+        board_state: HashMap::from([(
+            "1_1".to_owned(),
+            FieldState {
+                pawn_color: PawnColor::Black,
+                pawn_type: PawnType::Pawn,
+            },
+        )]),
     };
     match serde_json::to_string(&game_state) {
         Ok(game_state_json) => HttpResponse::Ok().json(game_state_json),
@@ -56,7 +66,7 @@ pub async fn get_example() -> impl Responder {
         }
     }
 }
-//"{\"player\":\"Black\",\"board_state\":{\"1_1\":[\"Black\",\"Pawn\"]}}"
+//"{\"player\":\"Black\",\"board_state\":{\"1_1\":{\"pawn_color\":\"Black\",\"pawn_type\":\"Pawn\"}}}"
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Healthcheck {
