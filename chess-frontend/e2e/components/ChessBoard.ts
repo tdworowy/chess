@@ -51,15 +51,15 @@ export class ChessBoard {
   }
 
   async dragPiceToSquare(piceId: string, squareId: string) {
-    let pawn = this.page.locator(`[id="${piceId}"][data-testid='${this.pieces.testId.pawn}']`)
-    let square = this.page.locator(`[id="${squareId}"][data-testid='${this.testId.square}']`)
+    const pawn = this.page.locator(`[id="${piceId}"][data-testid='${this.pieces.testId.pawn}']`)
+    const square = this.page.locator(`[id="${squareId}"][data-testid='${this.testId.square}']`)
 
     await pawn.dragTo(square)
   }
 
   async assertPiceOnSquare(id: string) {
-    let pawnCss = `[id="${id}"][data-testid='${this.pieces.testId.pawn}']`
-    let square = this.page.locator(`[id="${id}"][data-testid='${this.testId.square}']`)
+    const pawnCss = `[id="${id}"][data-testid='${this.pieces.testId.pawn}']`
+    const square = this.page.locator(`[id="${id}"][data-testid='${this.testId.square}']`)
 
     await expect(square.locator(pawnCss)).toBeVisible()
   }
