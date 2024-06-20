@@ -1,36 +1,9 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
-#[derive(Serialize, Deserialize, Debug)]
-enum Player {
-    Black,
-    White,
-}
+use game::{get_start_board, GameState, Player};
 
-#[derive(Serialize, Deserialize, Debug)]
-enum PawnColor {
-    Black,
-    White,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-enum PawnType {
-    Pawn,
-    Dame,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct FieldState {
-    pawn_color: PawnColor,
-    pawn_type: PawnType,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct GameState {
-    player: Player,
-    board_state: HashMap<String, FieldState>,
-}
+use crate::game;
 
 #[post("/make_move")]
 pub async fn make_move(game_state: web::Json<GameState>) -> impl Responder {
@@ -49,13 +22,7 @@ pub async fn make_move(game_state: web::Json<GameState>) -> impl Responder {
 pub async fn get_example() -> impl Responder {
     let game_state = GameState {
         player: Player::Black,
-        board_state: HashMap::from([(
-            "1_1".to_owned(),
-            FieldState {
-                pawn_color: PawnColor::Black,
-                pawn_type: PawnType::Pawn,
-            },
-        )]),
+        board_state: get_start_board(),
     };
     match serde_json::to_string(&game_state) {
         Ok(game_state_json) => HttpResponse::Ok().json(game_state_json),
@@ -66,7 +33,6 @@ pub async fn get_example() -> impl Responder {
         }
     }
 }
-//"{\"player\":\"Black\",\"board_state\":{\"1_1\":{\"pawn_color\":\"Black\",\"pawn_type\":\"Pawn\"}}}"
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Healthcheck {

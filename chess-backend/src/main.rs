@@ -1,4 +1,5 @@
 mod api;
+mod game;
 use api::{get_example, healthcheck, make_move};
 
 use actix_web::{App, HttpServer};
