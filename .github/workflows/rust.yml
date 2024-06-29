@@ -1,0 +1,23 @@
+name: Rust chess-backend
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  chess-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: chess-backend
+      - name: Build
+        run: rustup update && cargo build --manifest-path chess-backend/Cargo.toml --verbose
+      - name: Run tests
+        run: cargo test --manifest-path chess-backend/Cargo.toml --verbose
