@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::format};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Player {
@@ -223,11 +223,89 @@ fn can_white_pawn_move(game_state: GameState, position: String) -> bool {
 }
 
 fn can_black_pawn_beat(game_state: GameState, position: String) -> bool {
-    true
+    let _position: Vec<&str> = position.split("_").collect();
+    let mut result: bool = false;
+
+    let x: u32 = _position[0].parse().expect("not a number");
+    let y: u32 = _position[1].parse().expect("not a number");
+    if x <= 8 && y - 1 > 0 {
+        match game_state.board_state.get(&format!("{}_{}", x + 1, y - 1)) {
+            Some(state) => {
+                match state {
+                    FieldState {
+                        pawn_type: PawnType::Pawn,
+                        pawn_color: PawnColor::White,
+                    } => {
+                        result =
+                            can_black_pawn_move(game_state.clone(), format!("{}_{}", x + 1, y - 1))
+                    }
+                    _ => {}
+                };
+            }
+            None => {}
+        };
+    };
+    if x <= 8 && y + 1 <= 8 {
+        match game_state.board_state.get(&format!("{}_{}", x + 1, y + 1)) {
+            Some(state) => {
+                match state {
+                    FieldState {
+                        pawn_type: PawnType::Pawn,
+                        pawn_color: PawnColor::White,
+                    } => {
+                        result =
+                            can_black_pawn_move(game_state.clone(), format!("{}_{}", x + 1, y + 1))
+                    }
+                    _ => {}
+                };
+            }
+            None => {}
+        }
+    };
+    result
 }
 
 fn can_white_pawn_beat(game_state: GameState, position: String) -> bool {
-    true
+    let _position: Vec<&str> = position.split("_").collect();
+    let mut result: bool = false;
+
+    let x: u32 = _position[0].parse().expect("not a number");
+    let y: u32 = _position[1].parse().expect("not a number");
+    if x >= 1 && y - 1 > 0 {
+        match game_state.board_state.get(&format!("{}_{}", x - 1, y - 1)) {
+            Some(state) => {
+                match state {
+                    FieldState {
+                        pawn_type: PawnType::Pawn,
+                        pawn_color: PawnColor::Black,
+                    } => {
+                        result =
+                            can_white_pawn_move(game_state.clone(), format!("{}_{}", x - 1, y - 1))
+                    }
+                    _ => {}
+                };
+            }
+            None => {}
+        };
+    };
+    if x >= 1 && y + 1 <= 8 {
+        match game_state.board_state.get(&format!("{}_{}", x - 1, y + 1)) {
+            Some(state) => {
+                match state {
+                    FieldState {
+                        pawn_type: PawnType::Pawn,
+                        pawn_color: PawnColor::Black,
+                    } => {
+                        result =
+                            can_white_pawn_move(game_state.clone(), format!("{}_{}", x - 1, y + 1))
+                    }
+                    _ => {}
+                };
+            }
+            None => {}
+        }
+    };
+    result
 }
 
 fn can_dame_move(game_state: GameState, position: String) -> bool {
@@ -266,3 +344,5 @@ fn test_can_white_pawn_move() {
     assert!(can_white_pawn_move(game_state.clone(), "7_4".to_string()) == false);
     assert!(can_white_pawn_move(game_state.clone(), "7_8".to_string()) == false);
 }
+
+//TODO test can_black_pawn_beat and can_white_pawn_beat
