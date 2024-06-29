@@ -1,4 +1,0 @@
-- get position of all pawns that can move 
-- get position of all pawns that can move 
-- get position of all dames that can beat 
-- get position of all dames that can beat
