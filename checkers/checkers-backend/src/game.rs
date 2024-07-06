@@ -159,10 +159,10 @@ fn get_avaiable_actions(game_state: GameState) -> AvaiableActions {
                 if can_move.0 {
                     match dames_can_move.entry(state.0.clone()) {
                         Entry::Vacant(e) => {
-                            e.insert(vec![can_move.1.clone()]);
+                            e.insert(can_move.1.clone());
                         }
                         Entry::Occupied(mut e) => {
-                            e.get_mut().push(can_move.1.clone());
+                            e.get_mut().extend(can_move.1.clone());
                         }
                     }
                 }
@@ -170,10 +170,10 @@ fn get_avaiable_actions(game_state: GameState) -> AvaiableActions {
                 if can_beat.0 {
                     match dames_can_beat.entry(state.0) {
                         Entry::Vacant(e) => {
-                            e.insert(vec![(can_beat.1.clone(), can_beat.2.clone())]);
+                            e.insert(can_beat.1);
                         }
                         Entry::Occupied(mut e) => {
-                            e.get_mut().push((can_beat.1.clone(), can_beat.2.clone()));
+                            e.get_mut().extend(can_beat.1);
                         }
                     }
                 }
@@ -282,7 +282,7 @@ fn can_black_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
                         pawn_color: PawnColor::White,
                     } => {
                         enemy_and_next_positions.push(("temp".to_string(), "temp".to_string()));
-                        //TODO implemenmt it can_black_pawn_move won't work as is
+                        //TODO implemenmt it, using can_black_pawn_move here won't work as is
                     }
                     _ => {}
                 };
@@ -300,7 +300,7 @@ fn can_black_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
                         pawn_color: PawnColor::White,
                     } => {
                         enemy_and_next_positions.push(("temp".to_string(), "temp".to_string()));
-                        //TODO implemenmt it can_black_pawn_move won't work as is
+                        //TODO implemenmt it, using can_black_pawn_move here won't work as is
                     }
                     _ => {}
                 };
@@ -331,7 +331,7 @@ fn can_white_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
                         pawn_color: PawnColor::Black,
                     } => {
                         enemy_and_next_positions.push(("temp".to_string(), "temp".to_string()));
-                        //TODO implemenmt it can_white_pawn_move won't work as is;
+                        //TODO implemenmt it, using can_white_pawn_move here won't work as is
                     }
                     _ => {}
                 };
@@ -349,7 +349,7 @@ fn can_white_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
                         pawn_color: PawnColor::Black,
                     } => {
                         enemy_and_next_positions.push(("temp".to_string(), "temp".to_string()));
-                        //TODO implemenmt it can_white_pawn_move won't work as is;
+                        //TODO implemenmt it, using can_white_pawn_move here won't work as is
                     }
                     _ => {}
                 };
@@ -364,11 +364,11 @@ fn can_white_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
     }
 }
 
-fn can_dame_move(game_state: GameState, position: &String) -> (bool, String) {
-    (false, "".to_string())
+fn can_dame_move(game_state: GameState, position: &String) -> (bool, Vec<String>) {
+    (false, vec!["".to_string()])
 }
-fn can_dame_beat(game_state: GameState, position: &String) -> (bool, String, String) {
-    (false, "".to_string(), "".to_string())
+fn can_dame_beat(game_state: GameState, position: &String) -> (bool, Vec<(String, String)>) {
+    (false, vec![("".to_string(), "".to_string())])
 }
 
 #[test]
