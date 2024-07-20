@@ -189,6 +189,16 @@ fn get_avaiable_actions(game_state: GameState) -> AvaiableActions {
         dames_can_beat,
     }
 }
+fn is_position_free(board_state: &HashMap<String, FieldState>, position: &String) -> bool {
+    match board_state.get(position) {
+        Some(state) => match state.pawn_type {
+            PawnType::Empty => true,
+            PawnType::Pawn => false,
+            PawnType::Dame => false,
+        },
+        None => false,
+    }
+}
 
 fn can_black_pawn_move(game_state: GameState, position: &String) -> (bool, Vec<String>) {
     let _position: Vec<&str> = position.split("_").collect();
@@ -198,28 +208,15 @@ fn can_black_pawn_move(game_state: GameState, position: &String) -> (bool, Vec<S
     let y: u32 = _position[1].parse().expect("not a number");
     if x <= 8 && y - 1 > 0 {
         let next_position = format!("{}_{}", x + 1, y - 1);
-        match game_state.board_state.get(&next_position) {
-            Some(state) => {
-                match state.pawn_type {
-                    PawnType::Empty => next_positions.push(next_position),
-                    PawnType::Pawn => {}
-                    PawnType::Dame => {}
-                };
-            }
-            None => {}
-        };
-    };
+        if is_position_free(&game_state.board_state, &next_position) {
+            next_positions.push(next_position);
+        }
+    }
+
     if x <= 8 && y + 1 <= 8 {
         let next_position = format!("{}_{}", x + 1, y + 1);
-        match game_state.board_state.get(&next_position) {
-            Some(state) => {
-                match state.pawn_type {
-                    PawnType::Empty => next_positions.push(next_position),
-                    PawnType::Pawn => {}
-                    PawnType::Dame => {}
-                };
-            }
-            None => {}
+        if is_position_free(&game_state.board_state, &next_position) {
+            next_positions.push(next_position);
         }
     };
     if next_positions.len() > 0 {
@@ -236,28 +233,14 @@ fn can_white_pawn_move(game_state: GameState, position: &String) -> (bool, Vec<S
     let y: u32 = _position[1].parse().expect("not a number");
     if x >= 1 && y - 1 > 0 {
         let next_position = format!("{}_{}", x - 1, y - 1);
-        match game_state.board_state.get(&next_position) {
-            Some(state) => {
-                match state.pawn_type {
-                    PawnType::Empty => next_positions.push(next_position),
-                    PawnType::Pawn => {}
-                    PawnType::Dame => {}
-                };
-            }
-            None => {}
-        };
+        if is_position_free(&game_state.board_state, &next_position) {
+            next_positions.push(next_position);
+        }
     };
     if x >= 1 && y + 1 <= 8 {
         let next_position = format!("{}_{}", x - 1, y + 1);
-        match game_state.board_state.get(&next_position) {
-            Some(state) => {
-                match state.pawn_type {
-                    PawnType::Empty => next_positions.push(next_position),
-                    PawnType::Pawn => {}
-                    PawnType::Dame => {}
-                };
-            }
-            None => {}
+        if is_position_free(&game_state.board_state, &next_position) {
+            next_positions.push(next_position);
         }
     };
 
@@ -283,17 +266,8 @@ fn can_black_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
                     pawn_color: PawnColor::White,
                 } => {
                     let new_position = format!("{}_{}", x + 2, y - 2);
-                    match game_state.board_state.get(&new_position) {
-                        Some(state) => match state {
-                            FieldState {
-                                pawn_type: PawnType::Empty,
-                                pawn_color: PawnColor::Empty,
-                            } => {
-                                enemy_and_next_positions.push((enemy_position, new_position));
-                            }
-                            _ => {}
-                        },
-                        None => {}
+                    if is_position_free(&game_state.board_state, &new_position) {
+                        enemy_and_next_positions.push((enemy_position, new_position));
                     }
                 }
                 _ => {}
@@ -311,17 +285,8 @@ fn can_black_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
                         pawn_color: PawnColor::White,
                     } => {
                         let new_position = format!("{}_{}", x + 2, y + 2);
-                        match game_state.board_state.get(&new_position) {
-                            Some(state) => match state {
-                                FieldState {
-                                    pawn_type: PawnType::Empty,
-                                    pawn_color: PawnColor::Empty,
-                                } => {
-                                    enemy_and_next_positions.push((enemy_position, new_position));
-                                }
-                                _ => {}
-                            },
-                            None => {}
+                        if is_position_free(&game_state.board_state, &new_position) {
+                            enemy_and_next_positions.push((enemy_position, new_position));
                         }
                     }
                     _ => {}
@@ -353,17 +318,8 @@ fn can_white_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
                         pawn_color: PawnColor::Black,
                     } => {
                         let new_position = format!("{}_{}", x - 2, y - 2);
-                        match game_state.board_state.get(&new_position) {
-                            Some(state) => match state {
-                                FieldState {
-                                    pawn_type: PawnType::Empty,
-                                    pawn_color: PawnColor::Empty,
-                                } => {
-                                    enemy_and_next_positions.push((enemy_position, new_position));
-                                }
-                                _ => {}
-                            },
-                            None => {}
+                        if is_position_free(&game_state.board_state, &new_position) {
+                            enemy_and_next_positions.push((enemy_position, new_position));
                         }
                     }
                     _ => {}
@@ -382,17 +338,8 @@ fn can_white_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
                         pawn_color: PawnColor::Black,
                     } => {
                         let new_position = format!("{}_{}", x - 2, y + 2);
-                        match game_state.board_state.get(&new_position) {
-                            Some(state) => match state {
-                                FieldState {
-                                    pawn_type: PawnType::Empty,
-                                    pawn_color: PawnColor::Empty,
-                                } => {
-                                    enemy_and_next_positions.push((enemy_position, new_position));
-                                }
-                                _ => {}
-                            },
-                            None => {}
+                        if is_position_free(&game_state.board_state, &new_position) {
+                            enemy_and_next_positions.push((enemy_position, new_position));
                         }
                     }
                     _ => {}
@@ -628,4 +575,4 @@ fn test_get_avaiable_actions_white() {
     );
 }
 
-// TODO refactor
+// TODO dame, random move, 'best" move
