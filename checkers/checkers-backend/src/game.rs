@@ -565,4 +565,67 @@ fn test_can_white_pawn_beat() {
 
     assert_eq!(result, expeced);
 }
-//TODO test get_avaiable_actions
+
+#[test]
+fn test_get_avaiable_actions_black() {
+    let board_state = get_start_board();
+
+    let avaiable_actions = get_avaiable_actions(GameState {
+        player: Player::Black,
+        board_state,
+    });
+
+    assert_eq!(avaiable_actions.pawns_can_beat.len(), 0);
+    assert_eq!(avaiable_actions.dames_can_move.len(), 0);
+    assert_eq!(avaiable_actions.dames_can_beat.len(), 0);
+
+    assert_eq!(
+        avaiable_actions.pawns_can_move.get("3_2").unwrap(),
+        &vec!["4_1".to_string(), "4_3".to_string()]
+    );
+    assert_eq!(
+        avaiable_actions.pawns_can_move.get("3_4").unwrap(),
+        &vec!["4_3".to_string(), "4_5".to_string()]
+    );
+    assert_eq!(
+        avaiable_actions.pawns_can_move.get("3_6").unwrap(),
+        &vec!["4_5".to_string(), "4_7".to_string()]
+    );
+    assert_eq!(
+        avaiable_actions.pawns_can_move.get("3_8").unwrap(),
+        &vec!["4_7".to_string()]
+    );
+}
+
+#[test]
+fn test_get_avaiable_actions_white() {
+    let board_state = get_start_board();
+
+    let avaiable_actions = get_avaiable_actions(GameState {
+        player: Player::White,
+        board_state,
+    });
+
+    assert_eq!(avaiable_actions.pawns_can_beat.len(), 0);
+    assert_eq!(avaiable_actions.dames_can_move.len(), 0);
+    assert_eq!(avaiable_actions.dames_can_beat.len(), 0);
+
+    assert_eq!(
+        avaiable_actions.pawns_can_move.get("6_1").unwrap(),
+        &vec!["5_2".to_string()]
+    );
+    assert_eq!(
+        avaiable_actions.pawns_can_move.get("6_3").unwrap(),
+        &vec!["5_2".to_string(), "5_4".to_string()]
+    );
+    assert_eq!(
+        avaiable_actions.pawns_can_move.get("6_5").unwrap(),
+        &vec!["5_4".to_string(), "5_6".to_string()]
+    );
+    assert_eq!(
+        avaiable_actions.pawns_can_move.get("6_7").unwrap(),
+        &vec!["5_6".to_string(), "5_8".to_string()]
+    );
+}
+
+// TODO refactor
