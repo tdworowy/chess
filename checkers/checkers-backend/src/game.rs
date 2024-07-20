@@ -575,4 +575,11 @@ fn test_get_avaiable_actions_white() {
     );
 }
 
+#[test]
+fn test_is_position_free() {
+    let board_state = get_start_board();
+    assert!(is_position_free(&board_state, &"5_2".to_string()));
+    assert!(!is_position_free(&board_state, &"6_1".to_string()));
+}
+
 // TODO dame, random move, 'best" move
