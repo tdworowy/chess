@@ -1,6 +1,6 @@
 mod api;
 mod game;
-use api::{get_example, healthcheck, make_move};
+use api::{get_example, healthcheck, make_move_api, make_random_move_api};
 
 use actix_web::{App, HttpServer};
 
@@ -8,7 +8,8 @@ use actix_web::{App, HttpServer};
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
-            .service(make_move)
+            .service(make_move_api)
+            .service(make_random_move_api)
             .service(healthcheck)
             .service(get_example)
     })

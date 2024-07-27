@@ -1,4 +1,5 @@
 use pretty_assertions::assert_eq;
+use rand::seq::{IteratorRandom, SliceRandom};
 use serde::{Deserialize, Serialize};
 use std::collections::{hash_map::Entry, HashMap};
 
@@ -20,6 +21,13 @@ pub enum PawnType {
     Empty,
     Pawn,
     Dame,
+}
+
+pub enum ActionType {
+    PawnMove,
+    PawnBeat,
+    DameMove,
+    DameBeat,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -100,7 +108,84 @@ pub fn get_start_board() -> HashMap<String, FieldState> {
     start_board
 }
 
-fn get_avaiable_actions(game_state: GameState) -> AvaiableActions {
+pub fn make_random_move(game_state: GameState) -> Option<GameState> {
+    let avaiable_actions: AvaiableActions = get_avaiable_actions(&game_state);
+    let mut avaiable_actions_types: Vec<ActionType> = Vec::new();
+
+    let mut new_game_state = game_state.clone();
+
+    let mut can_meke_move = false;
+
+    if avaiable_actions.pawns_can_move.len() > 0 {
+        avaiable_actions_types.push(ActionType::PawnMove);
+    };
+    if avaiable_actions.pawns_can_beat.len() > 0 {
+        avaiable_actions_types.push(ActionType::PawnBeat);
+    };
+    if avaiable_actions.dames_can_move.len() > 0 {
+        avaiable_actions_types.push(ActionType::DameMove);
+    };
+    if avaiable_actions.dames_can_beat.len() > 0 {
+        avaiable_actions_types.push(ActionType::DameBeat);
+    };
+    match avaiable_actions_types.choose(&mut rand::thread_rng()) {
+        Some(action) => {
+            can_meke_move = true;
+
+            match action {
+                ActionType::PawnMove => {
+                    let pawn_move = avaiable_actions
+                        .pawns_can_move
+                        .into_iter()
+                        .choose(&mut rand::thread_rng())
+                        .unwrap();
+                    let start = pawn_move.0;
+                    let destination = pawn_move.1.choose(&mut rand::thread_rng()).unwrap();
+
+                    let dest_field = new_game_state.board_state.get_mut(destination).unwrap();
+                    *dest_field = game_state.board_state.get(&start).unwrap().clone();
+
+                    let start_field = new_game_state.board_state.get_mut(&start).unwrap();
+                    *start_field = FieldState {
+                        pawn_color: PawnColor::Empty,
+                        pawn_type: PawnType::Empty,
+                    };
+                }
+                ActionType::PawnBeat => {
+                    let pawn_beat = avaiable_actions
+                        .pawns_can_beat
+                        .into_iter()
+                        .choose(&mut rand::thread_rng())
+                        .unwrap();
+                    let start = pawn_beat.0;
+                    let destination = pawn_beat.1.choose(&mut rand::thread_rng()).unwrap();
+
+                    let dest_field = new_game_state.board_state.get_mut(&destination.1).unwrap();
+                    *dest_field = game_state.board_state.get(&start).unwrap().clone();
+                    let beating_field = new_game_state.board_state.get_mut(&destination.0).unwrap();
+                    *beating_field = FieldState {
+                        pawn_color: PawnColor::Empty,
+                        pawn_type: PawnType::Empty,
+                    };
+                    let start_field = new_game_state.board_state.get_mut(&start).unwrap();
+                    *start_field = FieldState {
+                        pawn_color: PawnColor::Empty,
+                        pawn_type: PawnType::Empty,
+                    };
+                }
+                ActionType::DameMove => { /*TODO*/ }
+                ActionType::DameBeat => { /*TODO*/ }
+            }
+        }
+        None => {}
+    };
+    if can_meke_move {
+        Some(new_game_state)
+    } else {
+        None
+    }
+}
+fn get_avaiable_actions(game_state: &GameState) -> AvaiableActions {
     let mut pawns_can_move: HashMap<String, Vec<String>> = HashMap::new();
     let mut pawns_can_beat: HashMap<String, Vec<(String, String)>> = HashMap::new();
     let mut dames_can_move: HashMap<String, Vec<String>> = HashMap::new();
@@ -517,7 +602,7 @@ fn test_can_white_pawn_beat() {
 fn test_get_avaiable_actions_black() {
     let board_state = get_start_board();
 
-    let avaiable_actions = get_avaiable_actions(GameState {
+    let avaiable_actions = get_avaiable_actions(&GameState {
         player: Player::Black,
         board_state,
     });
@@ -548,7 +633,7 @@ fn test_get_avaiable_actions_black() {
 fn test_get_avaiable_actions_white() {
     let board_state = get_start_board();
 
-    let avaiable_actions = get_avaiable_actions(GameState {
+    let avaiable_actions = get_avaiable_actions(&GameState {
         player: Player::White,
         board_state,
     });
