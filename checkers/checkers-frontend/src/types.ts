@@ -12,3 +12,8 @@ export enum PawnType {
   Dame = 'dame',
   Empty = ''
 }
+
+export enum Player {
+  Black = 'Black',
+  White = 'White'
+}
