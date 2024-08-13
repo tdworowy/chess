@@ -1,16 +1,16 @@
 export type boardStateType = (newState: { [key: string]: [Color, PawnType] }) => void
 
 export enum Color {
-  Dark = 'Dark',
-  Light = 'Light',
-  Empty = ''
+  Black = 'Black',
+  White = 'White',
+  Empty = 'Empty'
 }
 
 export enum PawnType {
-  PawnLight = 'pawnLight',
-  PawnDark = 'pawnDark',
-  Dame = 'dame',
-  Empty = ''
+  PawnWhite = 'PawnWhite',
+  PawnBlack = 'PawnBlack',
+  Dame = 'Dame',
+  Empty = 'Empty'
 }
 
 export enum Player {

@@ -1,11 +1,11 @@
 import { Color, PawnType } from './types'
 
 class PawnsMoveRules {
-  [PawnType.PawnDark](startX: number, startY: number, endX: number, endY: number) {
+  [PawnType.PawnBlack](startX: number, startY: number, endX: number, endY: number) {
     return startX - endX === -1 && Math.abs(startY - endY) === 1
   }
 
-  [PawnType.PawnLight](startX: number, startY: number, endX: number, endY: number) {
+  [PawnType.PawnWhite](startX: number, startY: number, endX: number, endY: number) {
     return startX - endX === 1 && Math.abs(startY - endY) === 1
   }
 
@@ -88,7 +88,7 @@ class PawnsBeatRules {
     }
     return pawnsFind === 1
   }
-  [PawnType.PawnDark](
+  [PawnType.PawnBlack](
     startX: number,
     startY: number,
     endX: number,
@@ -98,13 +98,13 @@ class PawnsBeatRules {
   ) {
     return (
       boardState[`${endX}_${endY}`][0] === Color.Empty &&
-      boardState[`${startX + 1}_${y}`][0] === Color.Light &&
+      boardState[`${startX + 1}_${y}`][0] === Color.White &&
       Math.abs(startY - endY) === 2 &&
       startX - endX === -2
     )
   }
 
-  [PawnType.PawnLight](
+  [PawnType.PawnWhite](
     startX: number,
     startY: number,
     endX: number,
@@ -114,7 +114,7 @@ class PawnsBeatRules {
   ) {
     return (
       boardState[`${endX}_${endY}`][0] === Color.Empty &&
-      boardState[`${startX - 1}_${y}`][0] === Color.Dark &&
+      boardState[`${startX - 1}_${y}`][0] === Color.Black &&
       Math.abs(startY - endY) === 2 &&
       startX - endX === 2
     )
@@ -129,7 +129,7 @@ class PawnsBeatRules {
     boardState: { [key: string]: [Color, PawnType] }
   ) {
     const opposedColor =
-      boardState[`${startX}_${startY}`][0] === Color.Dark ? Color.Light : Color.Dark
+      boardState[`${startX}_${startY}`][0] === Color.Black ? Color.White : Color.Black
     return (
       boardState[`${endX}_${endY}`][0] === Color.Empty &&
       startX !== endX &&
@@ -148,8 +148,8 @@ class PawnsBeatRules {
 }
 
 export class CheckersRules {
-  currentTurnColor = Color.Light
-  nextTurnColor = Color.Dark
+  currentTurnColor = Color.White
+  nextTurnColor = Color.Black
   pawnsMoveRules: PawnsMoveRules = new PawnsMoveRules()
   pawnsBeatRules: PawnsBeatRules = new PawnsBeatRules()
 
@@ -190,11 +190,11 @@ export class CheckersRules {
   canBecomeDame(x: number, y: number, boardState: { [key: string]: [Color, PawnType] }) {
     return (
       (x === 8 &&
-        boardState[`${x}_${y}`][0] === Color.Dark &&
-        boardState[`${x}_${y}`][1] === PawnType.PawnDark) ||
+        boardState[`${x}_${y}`][0] === Color.Black &&
+        boardState[`${x}_${y}`][1] === PawnType.PawnBlack) ||
       (x === 1 &&
-        boardState[`${x}_${y}`][0] === Color.Light &&
-        boardState[`${x}_${y}`][1] === PawnType.PawnLight)
+        boardState[`${x}_${y}`][0] === Color.White &&
+        boardState[`${x}_${y}`][1] === PawnType.PawnBlack)
     )
   }
 }

@@ -20,8 +20,7 @@ const props = defineProps<{
   y: number
   color: Color
 }>()
-const cls: String = props.color === Color.Dark ? classBlack : classWhite
-
+const cls: String = props.color === Color.Black ? classBlack : classWhite
 function allowDrop(event: DragEvent) {
   event.preventDefault()
 }
@@ -34,7 +33,7 @@ function beat(
 ) {
   const color = boardState[`${startX}_${startY}`][0]
   const y = startY > endY ? startY - 1 : startY + 1
-  const x = color === Color.Dark ? startX + 1 : startX - 1
+  const x = color === Color.Black ? startX + 1 : startX - 1
 
   boardState[`${x}_${y}`] = [Color.Empty, PawnType.Empty]
   document.querySelector(`[id='${x}_${y}'][class*='pawn']`)?.remove()
@@ -76,11 +75,11 @@ function drop(event: DragEvent) {
 
     setState(boardState)
     //TODO handle player better
-    const _json = Api.prepareJson(Player.White, boardState)
-    console.log(_json)
-    const next_move_json = Api.makeRandomMove(_json)
-    console.log(next_move_json)
-    checkersRules.nextTurn()
+    // const _json = Api.prepareJson(Player.White, boardState)
+    // console.log(_json)
+    // const next_move_json = Api.makeRandomMove(_json)
+    // console.log(next_move_json)
+    // checkersRules.nextTurn()
   }
 }
 </script>
