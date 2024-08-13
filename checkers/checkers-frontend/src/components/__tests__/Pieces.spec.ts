@@ -17,7 +17,7 @@ describe('Pieces component', () => {
         y: 1
       }
     })
-    expect(wrapperBlack.findAll('.pawnDark').length).toEqual(1)
-    expect(wrapperWhite.findAll('.pawnLight').length).toEqual(1)
+    expect(wrapperBlack.findAll('.PawnBlack').length).toEqual(1)
+    expect(wrapperWhite.findAll('.PawnWhite').length).toEqual(1)
   })
 })
