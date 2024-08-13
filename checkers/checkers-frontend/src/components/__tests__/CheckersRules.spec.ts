@@ -4,29 +4,29 @@ import { Color, PawnType } from '@/types'
 
 const initBoard: { [key: string]: [Color, PawnType] } = {
   '1_1': [Color.Empty, PawnType.Empty],
-  '1_2': [Color.Dark, PawnType.PawnDark],
+  '1_2': [Color.Black, PawnType.PawnBlack],
   '1_3': [Color.Empty, PawnType.Empty],
-  '1_4': [Color.Dark, PawnType.PawnDark],
+  '1_4': [Color.Black, PawnType.PawnBlack],
   '1_5': [Color.Empty, PawnType.Empty],
-  '1_6': [Color.Dark, PawnType.PawnDark],
+  '1_6': [Color.Black, PawnType.PawnBlack],
   '1_7': [Color.Empty, PawnType.Empty],
-  '1_8': [Color.Dark, PawnType.PawnDark],
-  '2_1': [Color.Dark, PawnType.PawnDark],
+  '1_8': [Color.Black, PawnType.PawnBlack],
+  '2_1': [Color.Black, PawnType.PawnBlack],
   '2_2': [Color.Empty, PawnType.Empty],
-  '2_3': [Color.Dark, PawnType.PawnDark],
+  '2_3': [Color.Black, PawnType.PawnBlack],
   '2_4': [Color.Empty, PawnType.Empty],
-  '2_5': [Color.Dark, PawnType.PawnDark],
+  '2_5': [Color.Black, PawnType.PawnBlack],
   '2_6': [Color.Empty, PawnType.Empty],
-  '2_7': [Color.Dark, PawnType.PawnDark],
+  '2_7': [Color.Black, PawnType.PawnBlack],
   '2_8': [Color.Empty, PawnType.Empty],
   '3_1': [Color.Empty, PawnType.Empty],
-  '3_2': [Color.Dark, PawnType.PawnDark],
+  '3_2': [Color.Black, PawnType.PawnBlack],
   '3_3': [Color.Empty, PawnType.Empty],
-  '3_4': [Color.Dark, PawnType.PawnDark],
+  '3_4': [Color.Black, PawnType.PawnBlack],
   '3_5': [Color.Empty, PawnType.Empty],
-  '3_6': [Color.Dark, PawnType.PawnDark],
+  '3_6': [Color.Black, PawnType.PawnBlack],
   '3_7': [Color.Empty, PawnType.Empty],
-  '3_8': [Color.Dark, PawnType.PawnDark],
+  '3_8': [Color.Black, PawnType.PawnBlack],
   '4_1': [Color.Empty, PawnType.Empty],
   '4_2': [Color.Empty, PawnType.Empty],
   '4_3': [Color.Empty, PawnType.Empty],
@@ -43,29 +43,29 @@ const initBoard: { [key: string]: [Color, PawnType] } = {
   '5_6': [Color.Empty, PawnType.Empty],
   '5_7': [Color.Empty, PawnType.Empty],
   '5_8': [Color.Empty, PawnType.Empty],
-  '6_1': [Color.Light, PawnType.PawnLight],
+  '6_1': [Color.White, PawnType.PawnWhite],
   '6_2': [Color.Empty, PawnType.Empty],
-  '6_3': [Color.Dark, PawnType.PawnLight],
+  '6_3': [Color.Black, PawnType.PawnWhite],
   '6_4': [Color.Empty, PawnType.Empty],
-  '6_5': [Color.Light, PawnType.PawnLight],
+  '6_5': [Color.White, PawnType.PawnWhite],
   '6_6': [Color.Empty, PawnType.Empty],
-  '6_7': [Color.Light, PawnType.PawnLight],
+  '6_7': [Color.White, PawnType.PawnWhite],
   '6_8': [Color.Empty, PawnType.Empty],
   '7_1': [Color.Empty, PawnType.Empty],
-  '7_2': [Color.Light, PawnType.PawnLight],
+  '7_2': [Color.White, PawnType.PawnWhite],
   '7_3': [Color.Empty, PawnType.Empty],
-  '7_4': [Color.Light, PawnType.PawnLight],
+  '7_4': [Color.White, PawnType.PawnWhite],
   '7_5': [Color.Empty, PawnType.Empty],
-  '7_6': [Color.Light, PawnType.PawnLight],
+  '7_6': [Color.White, PawnType.PawnWhite],
   '7_7': [Color.Empty, PawnType.Empty],
-  '7_8': [Color.Light, PawnType.PawnLight],
-  '8_1': [Color.Light, PawnType.PawnLight],
+  '7_8': [Color.White, PawnType.PawnWhite],
+  '8_1': [Color.White, PawnType.PawnWhite],
   '8_2': [Color.Empty, PawnType.Empty],
-  '8_3': [Color.Light, PawnType.PawnLight],
+  '8_3': [Color.White, PawnType.PawnWhite],
   '8_4': [Color.Empty, PawnType.Empty],
-  '8_5': [Color.Light, PawnType.PawnLight],
+  '8_5': [Color.White, PawnType.PawnWhite],
   '8_6': [Color.Empty, PawnType.Empty],
-  '8_7': [Color.Light, PawnType.PawnLight],
+  '8_7': [Color.White, PawnType.PawnWhite],
   '8_8': [Color.Empty, PawnType.Empty]
 }
 
@@ -76,16 +76,16 @@ describe('CheckersRules tests', () => {
       checkersRules = getNewCheckersRules()
     })
 
-    it('test canMove rule - can move dark', () => {
+    it('test canMove rule - can move Black', () => {
       checkersRules.nextTurn()
       expect(checkersRules.canMove(3, 2, 4, 3, initBoard)).to.be.true
     })
 
-    it("test canMove rule - can't move dark first", () => {
+    it("test canMove rule - can't move Black first", () => {
       expect(checkersRules.canMove(3, 2, 4, 3, initBoard)).to.be.false
     })
 
-    it('test canMove rule - can move light', () => {
+    it('test canMove rule - can move White', () => {
       expect(checkersRules.canMove(6, 1, 5, 2, initBoard)).to.be.true
     })
 
@@ -101,20 +101,20 @@ describe('CheckersRules tests', () => {
     beforeAll(() => {
       newBoard = Object.assign({}, initBoard)
       newBoard['6_1'] = [Color.Empty, PawnType.Empty]
-      newBoard['5_2'] = [Color.Light, PawnType.PawnLight]
+      newBoard['5_2'] = [Color.White, PawnType.PawnWhite]
       newBoard['3_4'] = [Color.Empty, PawnType.Empty]
-      newBoard['4_3'] = [Color.Dark, PawnType.PawnDark]
+      newBoard['4_3'] = [Color.Black, PawnType.PawnBlack]
     })
 
     beforeEach(() => {
       checkersRules = getNewCheckersRules()
     })
 
-    it('test canBeat rule - can move light', () => {
+    it('test canBeat rule - can move White', () => {
       expect(checkersRules.canBeat(5, 2, 3, 4, newBoard)).to.be.true
     })
 
-    it('test canBeat rule - can move dark', () => {
+    it('test canBeat rule - can move Black', () => {
       checkersRules.nextTurn()
       expect(checkersRules.canBeat(4, 3, 6, 1, newBoard)).to.be.true
     })
@@ -128,7 +128,7 @@ describe('CheckersRules tests', () => {
 
     it("test canBeat rule - can't move - go back", () => {
       newBoard = Object.assign({}, initBoard)
-      newBoard['3_4'] = [Color.Light, PawnType.PawnLight]
+      newBoard['3_4'] = [Color.White, PawnType.PawnWhite]
 
       expect(checkersRules.canBeat(3, 4, 5, 2, newBoard)).to.be.false
     })
@@ -158,7 +158,7 @@ describe('CheckersRules tests', () => {
         '3_1': [Color.Empty, PawnType.Empty],
         '3_2': [Color.Empty, PawnType.Empty],
         '3_3': [Color.Empty, PawnType.Empty],
-        '3_4': [Color.Dark, PawnType.Dame],
+        '3_4': [Color.Black, PawnType.Dame],
         '3_5': [Color.Empty, PawnType.Empty],
         '3_6': [Color.Empty, PawnType.Empty],
         '3_7': [Color.Empty, PawnType.Empty],
@@ -167,12 +167,12 @@ describe('CheckersRules tests', () => {
         '4_2': [Color.Empty, PawnType.Empty],
         '4_3': [Color.Empty, PawnType.Empty],
         '4_4': [Color.Empty, PawnType.Empty],
-        '4_5': [Color.Dark, PawnType.PawnDark],
+        '4_5': [Color.Black, PawnType.PawnBlack],
         '4_6': [Color.Empty, PawnType.Empty],
         '4_7': [Color.Empty, PawnType.Empty],
         '4_8': [Color.Empty, PawnType.Empty],
         '5_1': [Color.Empty, PawnType.Empty],
-        '5_2': [Color.Light, PawnType.PawnLight],
+        '5_2': [Color.White, PawnType.PawnWhite],
         '5_3': [Color.Empty, PawnType.Empty],
         '5_4': [Color.Empty, PawnType.Empty],
         '5_5': [Color.Empty, PawnType.Empty],
@@ -181,7 +181,7 @@ describe('CheckersRules tests', () => {
         '5_8': [Color.Empty, PawnType.Empty],
         '6_1': [Color.Empty, PawnType.Empty],
         '6_2': [Color.Empty, PawnType.Empty],
-        '6_3': [Color.Light, PawnType.Dame],
+        '6_3': [Color.White, PawnType.Dame],
         '6_4': [Color.Empty, PawnType.Empty],
         '6_5': [Color.Empty, PawnType.Empty],
         '6_6': [Color.Empty, PawnType.Empty],
@@ -201,7 +201,7 @@ describe('CheckersRules tests', () => {
         '8_4': [Color.Empty, PawnType.Empty],
         '8_5': [Color.Empty, PawnType.Empty],
         '8_6': [Color.Empty, PawnType.Empty],
-        '8_7': [Color.Light, PawnType.Dame],
+        '8_7': [Color.White, PawnType.Dame],
         '8_8': [Color.Empty, PawnType.Empty]
       }
     })
@@ -209,24 +209,24 @@ describe('CheckersRules tests', () => {
       checkersRules = getNewCheckersRules()
     })
 
-    it('test canMove rule - can move dark', () => {
+    it('test canMove rule - can move Black', () => {
       checkersRules.nextTurn()
       expect(checkersRules.canMove(3, 4, 6, 1, newBoard)).to.be.true
     })
 
-    it("test canMove rule - can't move dark first", () => {
+    it("test canMove rule - can't move Black first", () => {
       expect(checkersRules.canMove(3, 2, 5, 4, newBoard)).to.be.false
     })
 
-    it('test canMove rule - can move light', () => {
+    it('test canMove rule - can move White', () => {
       expect(checkersRules.canMove(8, 7, 2, 1, newBoard)).to.be.true
     })
 
-    it("test canMove rule - can't move - light", () => {
+    it("test canMove rule - can't move - White", () => {
       expect(checkersRules.canMove(8, 7, 6, 7, newBoard)).to.be.false
     })
 
-    it("test canMove rule - can't move - dark", () => {
+    it("test canMove rule - can't move - Black", () => {
       checkersRules.nextTurn()
       expect(checkersRules.canMove(3, 4, 5, 4, newBoard)).to.be.false
     })
@@ -256,7 +256,7 @@ describe('CheckersRules tests', () => {
         '3_1': [Color.Empty, PawnType.Empty],
         '3_2': [Color.Empty, PawnType.Empty],
         '3_3': [Color.Empty, PawnType.Empty],
-        '3_4': [Color.Dark, PawnType.Dame],
+        '3_4': [Color.Black, PawnType.Dame],
         '3_5': [Color.Empty, PawnType.Empty],
         '3_6': [Color.Empty, PawnType.Empty],
         '3_7': [Color.Empty, PawnType.Empty],
@@ -265,12 +265,12 @@ describe('CheckersRules tests', () => {
         '4_2': [Color.Empty, PawnType.Empty],
         '4_3': [Color.Empty, PawnType.Empty],
         '4_4': [Color.Empty, PawnType.Empty],
-        '4_5': [Color.Dark, PawnType.PawnDark],
+        '4_5': [Color.Black, PawnType.PawnBlack],
         '4_6': [Color.Empty, PawnType.Empty],
         '4_7': [Color.Empty, PawnType.Empty],
         '4_8': [Color.Empty, PawnType.Empty],
         '5_1': [Color.Empty, PawnType.Empty],
-        '5_2': [Color.Light, PawnType.PawnLight],
+        '5_2': [Color.White, PawnType.PawnWhite],
         '5_3': [Color.Empty, PawnType.Empty],
         '5_4': [Color.Empty, PawnType.Empty],
         '5_5': [Color.Empty, PawnType.Empty],
@@ -279,7 +279,7 @@ describe('CheckersRules tests', () => {
         '5_8': [Color.Empty, PawnType.Empty],
         '6_1': [Color.Empty, PawnType.Empty],
         '6_2': [Color.Empty, PawnType.Empty],
-        '6_3': [Color.Light, PawnType.Dame],
+        '6_3': [Color.White, PawnType.Dame],
         '6_4': [Color.Empty, PawnType.Empty],
         '6_5': [Color.Empty, PawnType.Empty],
         '6_6': [Color.Empty, PawnType.Empty],
@@ -308,11 +308,11 @@ describe('CheckersRules tests', () => {
       checkersRules = getNewCheckersRules()
     })
 
-    it('test canBeat rule - can move light', () => {
+    it('test canBeat rule - can move White', () => {
       expect(checkersRules.canBeat(6, 3, 3, 6, newBoard)).to.be.true
     })
 
-    it('test canBeat rule - can move dark', () => {
+    it('test canBeat rule - can move Black', () => {
       checkersRules.nextTurn()
       expect(checkersRules.canBeat(3, 4, 6, 1, newBoard)).to.be.true
     })

@@ -12,12 +12,11 @@ export class Api {
   //TODO return correct json
 
   static prepareJson(color: Player, boardState: { [key: string]: [Color, PawnType] }): moveJson {
-   
     const pawnMap = {
       PawnBlack: 'Pawn',
       PawnWhite: 'Pawn',
-      Empty: "Empty",
-      Dame: "Dame"
+      Empty: 'Empty',
+      Dame: 'Dame'
     }
 
     const new_board_state = <{ [key: string]: { pawn_color: string; pawn_type: string } }>{}

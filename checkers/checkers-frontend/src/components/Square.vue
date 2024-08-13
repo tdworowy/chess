@@ -75,11 +75,11 @@ function drop(event: DragEvent) {
 
     setState(boardState)
     //TODO handle player better
-    // const _json = Api.prepareJson(Player.White, boardState)
-    // console.log(_json)
-    // const next_move_json = Api.makeRandomMove(_json)
-    // console.log(next_move_json)
-    // checkersRules.nextTurn()
+    const _json = Api.prepareJson(Player.White, boardState)
+    console.log(_json)
+    const next_move_json = Api.makeRandomMove(_json)
+    console.log(next_move_json)
+    checkersRules.nextTurn()
   }
 }
 </script>
