@@ -12,22 +12,17 @@ export class Api {
   //TODO return correct json
 
   static prepareJson(color: Player, boardState: { [key: string]: [Color, PawnType] }): moveJson {
-    const colorMap = {
-      '': 'Empty',
-      Dark: 'Black',
-      Light: 'White'
-    }
     const pawnMap = {
-      '': 'Empty',
-      pawnDark: 'Pawn',
-      pawnLight: 'Pawn',
-      dame: 'Dame'
+      PawnBlack: 'Pawn',
+      PawnWhite: 'Pawn',
+      Empty: 'Empty',
+      Dame: 'Dame'
     }
 
     const new_board_state = <{ [key: string]: { pawn_color: string; pawn_type: string } }>{}
 
     for (const [key, value] of Object.entries(boardState)) {
-      new_board_state[key] = { pawn_color: colorMap[value[0]], pawn_type: pawnMap[value[1]] }
+      new_board_state[key] = { pawn_color: value[0], pawn_type: pawnMap[value[1]] }
     }
     const json = { player: color, board_state: new_board_state }
     return json

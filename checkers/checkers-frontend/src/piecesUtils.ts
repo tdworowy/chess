@@ -6,7 +6,7 @@ export const pieceCondition = (x: number, y: number) => {
 
 export const pieceColorCondiion = (x: number, y: number): [Color, PawnType] =>
   [1, 2, 3].includes(x) && pieceCondition(x, y)
-    ? [Color.Dark, PawnType.PawnDark]
+    ? [Color.Black, PawnType.PawnBlack]
     : [6, 7, 8].includes(x) && pieceCondition(x, y)
-    ? [Color.Light, PawnType.PawnLight]
+    ? [Color.White, PawnType.PawnWhite]
     : [Color.Empty, PawnType.Empty]

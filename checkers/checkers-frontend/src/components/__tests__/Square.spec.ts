@@ -16,7 +16,7 @@ describe('Square component', () => {
       propsData: {
         x: 1,
         y: 2,
-        color: Color.Light
+        color: Color.White
       }
     })
     expect(wrapperWhite.attributes('id')).toBe('1_2')
@@ -34,7 +34,7 @@ describe('Square component', () => {
       propsData: {
         x: 6,
         y: 1,
-        color: Color.Dark
+        color: Color.Black
       }
     })
     expect(wrapperBlack.attributes('id')).toBe('6_1')

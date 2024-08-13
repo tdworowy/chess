@@ -9,8 +9,8 @@ const props = defineProps<{
 
 const color = pieceColorCondiion(props.x, props.y)[0]
 
-const pawnDark = `pawn ${PawnType.PawnDark}`
-const pawnLight = `pawn ${PawnType.PawnLight}`
+const pawnBlack = `pawn ${PawnType.PawnBlack}`
+const pawnWhite = `pawn ${PawnType.PawnWhite}`
 
 const testId = { 'data-testid': 'pawn' }
 
@@ -31,33 +31,33 @@ function drag(event: DragEvent) {
   display: inline-block;
   position: absolute;
 }
-.pawnDark {
+.PawnBlack {
   background-color: #960a0a;
 }
-.pawnLight {
+.PawnWhite {
   background-color: #67c964;
 }
-.dame.pawnDark {
+.Dame.PawnBlack {
   background-color: #270303;
 }
-.dame.pawnLight {
+.Dame.PawnWhite {
   background-color: #163315;
 }
 </style>
 
 <template>
   <div
-    v-if="color === Color.Dark"
+    v-if="color === Color.Black"
     :id="x + '_' + y"
-    :class="pawnDark"
+    :class="pawnBlack"
     v-bind="testId"
     draggable="true"
     v-on:dragstart="drag"
   ></div>
   <div
-    v-if="color === Color.Light"
+    v-if="color === Color.White"
     :id="x + '_' + y"
-    :class="pawnLight"
+    :class="pawnWhite"
     v-bind="testId"
     draggable="true"
     v-on:dragstart="drag"
