@@ -1,4 +1,4 @@
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, options, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
 use game::{get_start_board, make_random_move, GameState, Player};
@@ -23,13 +23,25 @@ pub async fn make_random_move_api(game_state: web::Json<GameState>) -> impl Resp
     let game_state = game_state.into_inner();
     let new_game_state = make_random_move(game_state);
     match serde_json::to_string(&new_game_state) {
-        Ok(new_game_state_json) => HttpResponse::Ok().json(new_game_state_json),
+        Ok(new_game_state_json) => HttpResponse::Ok()
+            .append_header(("Access-Control-Allow-Origin", "*"))
+            .json(new_game_state_json),
         Err(error) => {
             eprintln!("{:?}", error);
             HttpResponse::InternalServerError()
                 .body(format!("make_move Error: {:?}", error.to_string()))
         }
     }
+}
+
+#[options("/make_radnom_move")]
+pub async fn make_random_move_options_api() -> impl Responder {
+    HttpResponse::Ok()
+        .append_header(("Allow", "OPTIONS, POST"))
+        .append_header(("Access-Control-Allow-Methods", "POST, OPTIONS"))
+        .append_header(("Access-Control-Allow-Headers", "Content-Type"))
+        .append_header(("Access-Control-Allow-Origin", "*"))
+        .finish()
 }
 
 #[get("/get_example")]
@@ -58,11 +70,22 @@ pub async fn healthcheck() -> impl Responder {
         message: "OK".to_owned(),
     };
     match serde_json::to_string(&healthcheck_struct) {
-        Ok(healthcheck_json) => HttpResponse::Ok().json(healthcheck_json),
+        Ok(healthcheck_json) => HttpResponse::Ok()
+            .append_header(("Access-Control-Allow-Origin", "*"))
+            .json(healthcheck_json),
         Err(error) => {
             eprintln!("{:?}", error);
             HttpResponse::InternalServerError()
                 .body(format!("Healthcheck Error: {:?}", error.to_string()))
         }
     }
+}
+
+#[options("/healthcheck")]
+pub async fn healthcheck_options() -> impl Responder {
+    HttpResponse::Ok()
+        .append_header(("Allow", "OPTIONS, GET"))
+        .append_header(("Access-Control-Allow-Methods", "GET, OPTIONS"))
+        .append_header(("Access-Control-Allow-Origin", "*"))
+        .finish()
 }

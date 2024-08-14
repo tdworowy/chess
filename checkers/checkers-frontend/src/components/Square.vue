@@ -41,7 +41,7 @@ function beat(
 }
 
 function drop(event: DragEvent) {
-  let boardState = getState()
+  let boardState = <{ [key: string]: [Color, PawnType] }>getState()
 
   const { target } = event
   event.preventDefault()
@@ -74,11 +74,16 @@ function drop(event: DragEvent) {
     }
 
     setState(boardState)
-    //TODO handle player better
-    const _json = Api.prepareJson(Player.White, boardState)
-    console.log(_json)
-    const next_move_json = Api.makeRandomMove(_json)
-    console.log(next_move_json)
+    // TODO handle player better
+    // TODO update FE
+
+    //AI move
+    checkersRules.nextTurn()
+    Api.healtCheck()
+    Api.makeRandomMove(Player.Black, boardState).then((next_move_json) => {
+      //console.log(next_move_json)
+      setState(next_move_json) // ignore this error
+    })
     checkersRules.nextTurn()
   }
 }
