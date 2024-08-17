@@ -20,9 +20,34 @@ const props = defineProps<{
   y: number
   color: Color
 }>()
+
 const cls: String = props.color === Color.Black ? classBlack : classWhite
+
 function allowDrop(event: DragEvent) {
   event.preventDefault()
+}
+
+function updateBoard(
+  boardState: { [key: string]: [Color, PawnType] },
+  newBoardState: { [key: string]: [Color, PawnType] }
+) {
+  for (const [key, value] of Object.entries(newBoardState)) {
+    if (boardState[key] !== newBoardState[key]) {
+      if (value[0] == Color.Empty) {
+        document.querySelector(`[id='${key}'][class*='pawn']`)?.remove()
+      } else {
+        const _class = value[1] === PawnType.Dame ? 'dame' : 'pawn'
+        const newPawn = document.createElement('div')
+        newPawn.id = key
+        newPawn.className = `${_class} ${value[1]}`
+        newPawn.setAttribute('data-testid', `${_class}`)
+        newPawn.setAttribute('draggable', 'true')
+
+        const square = document.querySelector(`[id='${key}'][class*='square']`)
+        square?.appendChild(newPawn)
+      }
+    }
+  }
 }
 // TODO handle DAME
 function beat(
@@ -75,16 +100,20 @@ function drop(event: DragEvent) {
 
     setState(boardState)
     // TODO handle player better
-    // TODO update FE
-
+    // TODO fix 
+    
     //AI move
     checkersRules.nextTurn()
-    Api.healtCheck()
-    Api.makeRandomMove(Player.Black, boardState).then((next_move_json) => {
-      //console.log(next_move_json)
-      setState(next_move_json) // ignore this error
+    Api.healtCheck().then((statusCode) => {
+      if (statusCode === 200) {
+        Api.makeRandomMove(Player.Black, boardState).then((newBoardState) => {
+          //console.log(next_move_json)
+          updateBoard(boardState, newBoardState)
+          setState(newBoardState) // ignore this error
+        })
+        checkersRules.nextTurn()
+      }
     })
-    checkersRules.nextTurn()
   }
 }
 </script>

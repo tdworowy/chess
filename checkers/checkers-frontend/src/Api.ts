@@ -63,10 +63,11 @@ export class Api {
   }
 
   static healtCheck() {
-    axios
+    return axios
       .get('http://localhost:8080/healthcheck')
       .then((response) => {
         console.log(response)
+        return response.status
       })
       .catch((error) => {
         console.log(error)
