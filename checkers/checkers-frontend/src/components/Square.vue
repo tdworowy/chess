@@ -32,7 +32,8 @@ function updateBoard(
   newBoardState: { [key: string]: [Color, PawnType] }
 ) {
   for (const [key, value] of Object.entries(newBoardState)) {
-    if (boardState[key] !== newBoardState[key]) {
+    if (JSON.stringify(boardState[key]) !== JSON.stringify(value)) {
+      console.log(`${boardState[key]} !== ${value}`)
       if (value[0] == Color.Empty) {
         document.querySelector(`[id='${key}'][class*='pawn']`)?.remove()
       } else {
@@ -109,7 +110,9 @@ function drop(event: DragEvent) {
         Api.makeRandomMove(Player.Black, boardState).then((newBoardState) => {
           //console.log(next_move_json)
           updateBoard(boardState, newBoardState)
-          setState(newBoardState) // ignore this error
+          // boardState = newBoardState
+          // setState(boardState) 
+          setState(newBoardState) 
         })
         checkersRules.nextTurn()
       }
