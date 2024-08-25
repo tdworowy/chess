@@ -106,12 +106,11 @@ function drop(event: DragEvent) {
     //AI move
     checkersRules.nextTurn()
     Api.healtCheck().then((statusCode) => {
+      let boardStateTemp = <{ [key: string]: [Color, PawnType] }>getState()
       if (statusCode === 200) {
-        Api.makeRandomMove(Player.Black, boardState).then((newBoardState) => {
+        Api.makeRandomMove(Player.Black, boardStateTemp).then((newBoardState) => {
           //console.log(next_move_json)
-          updateBoard(boardState, newBoardState)
-          // boardState = newBoardState
-          // setState(boardState) 
+          updateBoard(boardStateTemp, newBoardState)
           setState(newBoardState) 
         })
         checkersRules.nextTurn()
