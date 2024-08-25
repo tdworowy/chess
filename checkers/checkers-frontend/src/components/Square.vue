@@ -101,8 +101,8 @@ function drop(event: DragEvent) {
 
     setState(boardState)
     // TODO handle player better
-    // TODO fix 
-    
+    // TODO fix
+
     //AI move
     checkersRules.nextTurn()
     Api.healtCheck().then((statusCode) => {
@@ -111,7 +111,7 @@ function drop(event: DragEvent) {
         Api.makeRandomMove(Player.Black, boardStateTemp).then((newBoardState) => {
           //console.log(next_move_json)
           updateBoard(boardStateTemp, newBoardState)
-          setState(newBoardState) 
+          setState(newBoardState)
         })
         checkersRules.nextTurn()
       }
