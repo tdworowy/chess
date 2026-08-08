@@ -18,7 +18,7 @@ pub async fn make_move_api(game_state: web::Json<GameState>) -> impl Responder {
     }
 }
 
-#[post("/make_radnom_move")]
+#[post("/make_random_move")]
 pub async fn make_random_move_api(game_state: web::Json<GameState>) -> impl Responder {
     let game_state = game_state.into_inner();
     let new_game_state = make_random_move(game_state);
@@ -34,7 +34,7 @@ pub async fn make_random_move_api(game_state: web::Json<GameState>) -> impl Resp
     }
 }
 
-#[options("/make_radnom_move")]
+#[options("/make_random_move")]
 pub async fn make_random_move_options_api() -> impl Responder {
     HttpResponse::Ok()
         .append_header(("Allow", "OPTIONS, POST"))

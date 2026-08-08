@@ -109,7 +109,7 @@ pub fn get_start_board() -> HashMap<String, FieldState> {
 }
 
 pub fn make_random_move(game_state: GameState) -> Option<GameState> {
-    let avaiable_actions: AvaiableActions = get_avaiable_actions(&game_state);
+    let avaiable_actions: AvaiableActions = get_available_actions(&game_state);
     let mut avaiable_actions_types: Vec<ActionType> = Vec::new();
 
     let mut new_game_state = game_state.clone();
@@ -185,7 +185,7 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
         None
     }
 }
-fn get_avaiable_actions(game_state: &GameState) -> AvaiableActions {
+fn get_available_actions(game_state: &GameState) -> AvaiableActions {
     let mut pawns_can_move: HashMap<String, Vec<String>> = HashMap::new();
     let mut pawns_can_beat: HashMap<String, Vec<(String, String)>> = HashMap::new();
     let mut dames_can_move: HashMap<String, Vec<String>> = HashMap::new();
@@ -599,10 +599,10 @@ fn test_can_white_pawn_beat() {
 }
 
 #[test]
-fn test_get_avaiable_actions_black() {
+fn test_get_available_actions_black() {
     let board_state = get_start_board();
 
-    let avaiable_actions = get_avaiable_actions(&GameState {
+    let avaiable_actions = get_available_actions(&GameState {
         player: Player::Black,
         board_state,
     });
@@ -630,10 +630,10 @@ fn test_get_avaiable_actions_black() {
 }
 
 #[test]
-fn test_get_avaiable_actions_white() {
+fn test_get_available_actions_white() {
     let board_state = get_start_board();
 
-    let avaiable_actions = get_avaiable_actions(&GameState {
+    let avaiable_actions = get_available_actions(&GameState {
         player: Player::White,
         board_state,
     });
