@@ -8,29 +8,20 @@ use crate::game;
 #[post("/make_move")]
 pub async fn make_move_api(game_state: web::Json<GameState>) -> impl Responder {
     let game_state = game_state.into_inner();
-    match serde_json::to_string(&game_state) {
-        Ok(game_state_json) => HttpResponse::Ok().json(game_state_json),
-        Err(error) => {
-            eprintln!("{:?}", error);
-            HttpResponse::InternalServerError()
-                .body(format!("make_move Error: {:?}", error.to_string()))
-        }
-    }
+    HttpResponse::Ok().json(game_state)
 }
 
 #[post("/make_random_move")]
 pub async fn make_random_move_api(game_state: web::Json<GameState>) -> impl Responder {
     let game_state = game_state.into_inner();
     let new_game_state = make_random_move(game_state);
-    match serde_json::to_string(&new_game_state) {
-        Ok(new_game_state_json) => HttpResponse::Ok()
+    match new_game_state {
+        Some(state) => HttpResponse::Ok()
             .append_header(("Access-Control-Allow-Origin", "*"))
-            .json(new_game_state_json),
-        Err(error) => {
-            eprintln!("{:?}", error);
-            HttpResponse::InternalServerError()
-                .body(format!("make_move Error: {:?}", error.to_string()))
-        }
+            .json(state),
+        None => HttpResponse::BadRequest()
+            .append_header(("Access-Control-Allow-Origin", "*"))
+            .body("No available moves"),
     }
 }
 
@@ -50,14 +41,7 @@ pub async fn get_example() -> impl Responder {
         player: Player::Black,
         board_state: get_start_board(),
     };
-    match serde_json::to_string(&game_state) {
-        Ok(game_state_json) => HttpResponse::Ok().json(game_state_json),
-        Err(error) => {
-            eprintln!("{:?}", error);
-            HttpResponse::InternalServerError()
-                .body(format!("get_example Error: {:?}", error.to_string()))
-        }
-    }
+    HttpResponse::Ok().json(game_state)
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -69,16 +53,9 @@ pub async fn healthcheck() -> impl Responder {
     let healthcheck_struct = Healthcheck {
         message: "OK".to_owned(),
     };
-    match serde_json::to_string(&healthcheck_struct) {
-        Ok(healthcheck_json) => HttpResponse::Ok()
-            .append_header(("Access-Control-Allow-Origin", "*"))
-            .json(healthcheck_json),
-        Err(error) => {
-            eprintln!("{:?}", error);
-            HttpResponse::InternalServerError()
-                .body(format!("Healthcheck Error: {:?}", error.to_string()))
-        }
-    }
+    HttpResponse::Ok()
+        .append_header(("Access-Control-Allow-Origin", "*"))
+        .json(healthcheck_struct)
 }
 
 #[options("/healthcheck")]

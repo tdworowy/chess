@@ -11,16 +11,16 @@ from utils import generate_init_board
     [
         ("http://localhost:8080/healthcheck", {"message": "OK"}),
         (
-                "http://localhost:8080/get_example",
-                {
-                    "player": "Black",
-                    "board_state": generate_init_board(),
-                },
+            "http://localhost:8080/get_example",
+            {
+                "player": "Black",
+                "board_state": generate_init_board(),
+            },
         ),
     ],
 )
 def test_smoke(url: str, result: dict):
-    response = json.loads(requests.get(url).json())
+    response = requests.get(url).json()
     print(response)
     assert response == result
 
@@ -36,7 +36,7 @@ def test_make_move():
         json=data,
     )
     assert response.status_code == 200
-    assert json.loads(response.json()) == data
+    assert response.json() == data
 
 
 def test_make_random_move():
@@ -50,4 +50,4 @@ def test_make_random_move():
         json=data,
     )
     assert response.status_code == 200
-    assert json.loads(response.json()) != data
+    assert response.json() != data
