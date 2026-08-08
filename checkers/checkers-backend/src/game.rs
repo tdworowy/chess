@@ -1,8 +1,8 @@
 use pretty_assertions::assert_eq;
-use rand::seq::{IteratorRandom, SliceRandom};
+use rand::prelude::IndexedRandom;
+use rand::seq::IteratorRandom;
 use serde::{Deserialize, Serialize};
 use std::collections::{hash_map::Entry, HashMap};
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Player {
     Black,
@@ -128,7 +128,7 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
     if avaiable_actions.dames_can_beat.len() > 0 {
         avaiable_actions_types.push(ActionType::DameBeat);
     };
-    match avaiable_actions_types.choose(&mut rand::thread_rng()) {
+    match avaiable_actions_types.into_iter().choose(&mut rand::rng()) {
         Some(action) => {
             can_meke_move = true;
 
@@ -137,10 +137,10 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
                     let pawn_move = avaiable_actions
                         .pawns_can_move
                         .into_iter()
-                        .choose(&mut rand::thread_rng())
+                        .choose(&mut rand::rng())
                         .unwrap();
                     let start = pawn_move.0;
-                    let destination = pawn_move.1.choose(&mut rand::thread_rng()).unwrap();
+                    let destination = pawn_move.1.choose(&mut rand::rng()).unwrap();
 
                     let dest_field = new_game_state.board_state.get_mut(destination).unwrap();
                     *dest_field = game_state.board_state.get(&start).unwrap().clone();
@@ -155,10 +155,10 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
                     let pawn_beat = avaiable_actions
                         .pawns_can_beat
                         .into_iter()
-                        .choose(&mut rand::thread_rng())
+                        .choose(&mut rand::rng())
                         .unwrap();
                     let start = pawn_beat.0;
-                    let destination = pawn_beat.1.choose(&mut rand::thread_rng()).unwrap();
+                    let destination = pawn_beat.1.choose(&mut rand::rng()).unwrap();
 
                     let dest_field = new_game_state.board_state.get_mut(&destination.1).unwrap();
                     *dest_field = game_state.board_state.get(&start).unwrap().clone();
