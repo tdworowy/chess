@@ -45,7 +45,7 @@ def test_make_random_move():
         "board_state": generate_init_board(),
     }
     response = requests.post(
-        "http://localhost:8080/make_radnom_move",
+        "http://localhost:8080/make_random_move",
         headers={"Content-Type": "application/json"},
         json=data,
     )
