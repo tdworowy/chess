@@ -1,5 +1,6 @@
-mod api;
-mod game;
+pub mod api;
+pub mod game;
+
 use api::{
     get_example, healthcheck, healthcheck_options, make_move_api, make_random_move_api,
     make_random_move_options_api,

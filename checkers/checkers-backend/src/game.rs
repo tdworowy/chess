@@ -1,4 +1,3 @@
-use pretty_assertions::assert_eq;
 use rand::prelude::IndexedRandom;
 use rand::seq::IteratorRandom;
 use serde::{Deserialize, Serialize};
@@ -43,7 +42,7 @@ pub struct GameState {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct AvaiableActions {
+pub struct AvailableActions {
     pawns_can_move: HashMap<String, Vec<String>>,
     pawns_can_beat: HashMap<String, Vec<(String, String)>>,
     dames_can_move: HashMap<String, Vec<String>>,
@@ -109,32 +108,31 @@ pub fn get_start_board() -> HashMap<String, FieldState> {
 }
 
 pub fn make_random_move(game_state: GameState) -> Option<GameState> {
-    let avaiable_actions: AvaiableActions = get_available_actions(&game_state);
-    let mut avaiable_actions_types: Vec<ActionType> = Vec::new();
+    let available_actions: AvailableActions = get_available_actions(&game_state);
+    let mut available_actions_types: Vec<ActionType> = Vec::new();
 
     let mut new_game_state = game_state.clone();
-
     let mut can_meke_move = false;
 
-    if avaiable_actions.pawns_can_move.len() > 0 {
-        avaiable_actions_types.push(ActionType::PawnMove);
+    if available_actions.pawns_can_move.len() > 0 {
+        available_actions_types.push(ActionType::PawnMove);
     };
-    if avaiable_actions.pawns_can_beat.len() > 0 {
-        avaiable_actions_types.push(ActionType::PawnBeat);
+    if available_actions.pawns_can_beat.len() > 0 {
+        available_actions_types.push(ActionType::PawnBeat);
     };
-    if avaiable_actions.dames_can_move.len() > 0 {
-        avaiable_actions_types.push(ActionType::DameMove);
+    if available_actions.dames_can_move.len() > 0 {
+        available_actions_types.push(ActionType::DameMove);
     };
-    if avaiable_actions.dames_can_beat.len() > 0 {
-        avaiable_actions_types.push(ActionType::DameBeat);
+    if available_actions.dames_can_beat.len() > 0 {
+        available_actions_types.push(ActionType::DameBeat);
     };
-    match avaiable_actions_types.into_iter().choose(&mut rand::rng()) {
+    match available_actions_types.into_iter().choose(&mut rand::rng()) {
         Some(action) => {
             can_meke_move = true;
 
             match action {
                 ActionType::PawnMove => {
-                    let pawn_move = avaiable_actions
+                    let pawn_move = available_actions
                         .pawns_can_move
                         .into_iter()
                         .choose(&mut rand::rng())
@@ -152,7 +150,7 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
                     };
                 }
                 ActionType::PawnBeat => {
-                    let pawn_beat = avaiable_actions
+                    let pawn_beat = available_actions
                         .pawns_can_beat
                         .into_iter()
                         .choose(&mut rand::rng())
@@ -173,8 +171,46 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
                         pawn_type: PawnType::Empty,
                     };
                 }
-                ActionType::DameMove => { /*TODO*/ }
-                ActionType::DameBeat => { /*TODO*/ }
+                ActionType::DameMove => {
+                    let dame_move = available_actions
+                        .dames_can_move
+                        .into_iter()
+                        .choose(&mut rand::rng())
+                        .unwrap();
+                    let start = dame_move.0;
+                    let destination = dame_move.1.choose(&mut rand::rng()).unwrap();
+
+                    let dest_field = new_game_state.board_state.get_mut(destination).unwrap();
+                    *dest_field = game_state.board_state.get(&start).unwrap().clone();
+
+                    let start_field = new_game_state.board_state.get_mut(&start).unwrap();
+                    *start_field = FieldState {
+                        pawn_color: PawnColor::Empty,
+                        pawn_type: PawnType::Empty,
+                    };
+                }
+                ActionType::DameBeat => {
+                    let dame_beat = available_actions
+                        .dames_can_beat
+                        .into_iter()
+                        .choose(&mut rand::rng())
+                        .unwrap();
+                    let start = dame_beat.0;
+                    let destination = dame_beat.1.choose(&mut rand::rng()).unwrap();
+
+                    let dest_field = new_game_state.board_state.get_mut(&destination.1).unwrap();
+                    *dest_field = game_state.board_state.get(&start).unwrap().clone();
+                    let beating_field = new_game_state.board_state.get_mut(&destination.0).unwrap();
+                    *beating_field = FieldState {
+                        pawn_color: PawnColor::Empty,
+                        pawn_type: PawnType::Empty,
+                    };
+                    let start_field = new_game_state.board_state.get_mut(&start).unwrap();
+                    *start_field = FieldState {
+                        pawn_color: PawnColor::Empty,
+                        pawn_type: PawnType::Empty,
+                    };
+                }
             }
         }
         None => {}
@@ -185,7 +221,7 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
         None
     }
 }
-fn get_available_actions(game_state: &GameState) -> AvaiableActions {
+fn get_available_actions(game_state: &GameState) -> AvailableActions {
     let mut pawns_can_move: HashMap<String, Vec<String>> = HashMap::new();
     let mut pawns_can_beat: HashMap<String, Vec<(String, String)>> = HashMap::new();
     let mut dames_can_move: HashMap<String, Vec<String>> = HashMap::new();
@@ -210,64 +246,69 @@ fn get_available_actions(game_state: &GameState) -> AvaiableActions {
         .clone()
         .board_state
         .into_iter()
-        .for_each(|state| match state.1 {
-            FieldState {
-                pawn_color,
-                pawn_type: PawnType::Pawn,
-            } => {
-                let can_move = move_funcion(game_state.clone(), &state.0);
-                if can_move.0 {
-                    match pawns_can_move.entry(state.0.clone()) {
-                        Entry::Vacant(e) => {
-                            e.insert(can_move.1.clone());
-                        }
-                        Entry::Occupied(mut e) => {
-                            e.get_mut().extend(can_move.1.clone());
-                        }
-                    }
-                }
-                let can_beat = beat_function(game_state.clone(), &state.0);
-                if can_beat.0 {
-                    match pawns_can_beat.entry(state.0) {
-                        Entry::Vacant(e) => {
-                            e.insert(can_beat.1.clone());
-                        }
-                        Entry::Occupied(mut e) => {
-                            e.get_mut().extend(can_beat.1);
-                        }
-                    }
-                }
+        .for_each(|state| {
+            if state.1.pawn_color != pawn_color {
+                return;
             }
-            FieldState {
-                pawn_color,
-                pawn_type: PawnType::Dame,
-            } => {
-                let can_move = can_dame_move(game_state.clone(), &state.0);
-                if can_move.0 {
-                    match dames_can_move.entry(state.0.clone()) {
-                        Entry::Vacant(e) => {
-                            e.insert(can_move.1.clone());
+            match state.1 {
+                FieldState {
+                    pawn_color: _,
+                    pawn_type: PawnType::Pawn,
+                } => {
+                    let can_move = move_funcion(game_state.clone(), &state.0);
+                    if can_move.0 {
+                        match pawns_can_move.entry(state.0.clone()) {
+                            Entry::Vacant(e) => {
+                                e.insert(can_move.1.clone());
+                            }
+                            Entry::Occupied(mut e) => {
+                                e.get_mut().extend(can_move.1.clone());
+                            }
                         }
-                        Entry::Occupied(mut e) => {
-                            e.get_mut().extend(can_move.1.clone());
+                    }
+                    let can_beat = beat_function(game_state.clone(), &state.0);
+                    if can_beat.0 {
+                        match pawns_can_beat.entry(state.0) {
+                            Entry::Vacant(e) => {
+                                e.insert(can_beat.1.clone());
+                            }
+                            Entry::Occupied(mut e) => {
+                                e.get_mut().extend(can_beat.1);
+                            }
                         }
                     }
                 }
-                let can_beat = can_dame_beat(game_state.clone(), &state.0);
-                if can_beat.0 {
-                    match dames_can_beat.entry(state.0) {
-                        Entry::Vacant(e) => {
-                            e.insert(can_beat.1);
+                FieldState {
+                    pawn_color: _,
+                    pawn_type: PawnType::Dame,
+                } => {
+                    let can_move = can_dame_move(game_state.clone(), &state.0);
+                    if can_move.0 {
+                        match dames_can_move.entry(state.0.clone()) {
+                            Entry::Vacant(e) => {
+                                e.insert(can_move.1.clone());
+                            }
+                            Entry::Occupied(mut e) => {
+                                e.get_mut().extend(can_move.1.clone());
+                            }
                         }
-                        Entry::Occupied(mut e) => {
-                            e.get_mut().extend(can_beat.1);
+                    }
+                    let can_beat = can_dame_beat(game_state.clone(), &state.0);
+                    if can_beat.0 {
+                        match dames_can_beat.entry(state.0) {
+                            Entry::Vacant(e) => {
+                                e.insert(can_beat.1);
+                            }
+                            Entry::Occupied(mut e) => {
+                                e.get_mut().extend(can_beat.1);
+                            }
                         }
                     }
                 }
+                _ => {}
             }
-            _ => {}
         });
-    AvaiableActions {
+    AvailableActions {
         pawns_can_move,
         pawns_can_beat,
         dames_can_move,
@@ -291,14 +332,14 @@ fn can_black_pawn_move(game_state: GameState, position: &String) -> (bool, Vec<S
 
     let x: u32 = _position[0].parse().expect("not a number");
     let y: u32 = _position[1].parse().expect("not a number");
-    if x <= 8 && y - 1 > 0 {
+    if x < 8 && y - 1 > 0 {
         let next_position = format!("{}_{}", x + 1, y - 1);
         if is_position_free(&game_state.board_state, &next_position) {
             next_positions.push(next_position);
         }
     }
 
-    if x <= 8 && y + 1 <= 8 {
+    if x < 8 && y + 1 <= 8 {
         let next_position = format!("{}_{}", x + 1, y + 1);
         if is_position_free(&game_state.board_state, &next_position) {
             next_positions.push(next_position);
@@ -316,13 +357,13 @@ fn can_white_pawn_move(game_state: GameState, position: &String) -> (bool, Vec<S
     let mut next_positions: Vec<String> = Vec::new();
     let x: u32 = _position[0].parse().expect("not a number");
     let y: u32 = _position[1].parse().expect("not a number");
-    if x >= 1 && y - 1 > 0 {
+    if x > 1 && y > 1 {
         let next_position = format!("{}_{}", x - 1, y - 1);
         if is_position_free(&game_state.board_state, &next_position) {
             next_positions.push(next_position);
         }
     };
-    if x >= 1 && y + 1 <= 8 {
+    if x > 1 && y < 8 {
         let next_position = format!("{}_{}", x - 1, y + 1);
         if is_position_free(&game_state.board_state, &next_position) {
             next_positions.push(next_position);
@@ -342,7 +383,7 @@ fn can_black_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
 
     let x: u32 = _position[0].parse().expect("not a number");
     let y: u32 = _position[1].parse().expect("not a number");
-    if x <= 8 && y - 1 > 0 {
+    if x < 7 && y - 1 > 1 {
         let enemy_position = format!("{}_{}", x + 1, y - 1);
         match game_state.board_state.get(&enemy_position) {
             Some(state) => match state {
@@ -360,7 +401,7 @@ fn can_black_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
             None => {}
         }
     };
-    if x <= 8 && y + 1 <= 8 {
+    if x < 7 && y + 1 < 8 {
         let enemy_position = format!("{}_{}", x + 1, y + 1);
         match game_state.board_state.get(&enemy_position) {
             Some(state) => {
@@ -393,7 +434,7 @@ fn can_white_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
 
     let x: u32 = _position[0].parse().expect("not a number");
     let y: u32 = _position[1].parse().expect("not a number");
-    if x >= 1 && y - 1 > 0 {
+    if x > 2 && y > 2 {
         let enemy_position = format!("{}_{}", x - 1, y - 1);
         match game_state.board_state.get(&enemy_position) {
             Some(state) => {
@@ -413,7 +454,7 @@ fn can_white_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
             None => {}
         };
     };
-    if x >= 1 && y + 1 <= 8 {
+    if x > 2 && y < 7 {
         let enemy_position = format!("{}_{}", x - 1, y + 1);
         match game_state.board_state.get(&enemy_position) {
             Some(state) => {
@@ -440,10 +481,10 @@ fn can_white_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(
     }
 }
 
-fn can_dame_move(game_state: GameState, position: &String) -> (bool, Vec<String>) {
+fn can_dame_move(_game_state: GameState, _position: &String) -> (bool, Vec<String>) {
     (false, vec!["".to_string()])
 }
-fn can_dame_beat(game_state: GameState, position: &String) -> (bool, Vec<(String, String)>) {
+fn can_dame_beat(_game_state: GameState, _position: &String) -> (bool, Vec<(String, String)>) {
     (false, vec![("".to_string(), "".to_string())])
 }
 
@@ -513,6 +554,26 @@ fn test_can_white_pawn_move() {
 }
 
 #[test]
+fn test_get_available_actions_color_filter() {
+    let board_state = get_start_board();
+    // Black's turn, but let's see if it only picks black pawns
+    let game_state = GameState {
+        player: Player::Black,
+        board_state,
+    };
+    let actions = get_available_actions(&game_state);
+
+    for (pos, _) in actions.pawns_can_move {
+        let field = game_state.board_state.get(&pos).unwrap();
+        assert_eq!(field.pawn_color, PawnColor::Black);
+    }
+    for (pos, _) in actions.pawns_can_beat {
+        let field = game_state.board_state.get(&pos).unwrap();
+        assert_eq!(field.pawn_color, PawnColor::Black);
+    }
+}
+
+#[test]
 fn test_can_black_pawn_beat() {
     let mut board_state = get_start_board();
 
@@ -546,13 +607,13 @@ fn test_can_black_pawn_beat() {
 
     let game_state = GameState {
         player: Player::Black,
-        board_state: board_state,
+        board_state,
     };
 
     let result = can_black_pawn_beat(game_state, &"4_3".to_string());
-    let expeced = (true, vec![("5_2".to_string(), "6_1".to_string())]);
+    let expected = (true, vec![("5_2".to_string(), "6_1".to_string())]);
 
-    assert_eq!(result, expeced);
+    assert_eq!(result, expected);
 }
 
 #[test]
@@ -589,42 +650,42 @@ fn test_can_white_pawn_beat() {
 
     let game_state = GameState {
         player: Player::White,
-        board_state: board_state,
+        board_state,
     };
 
     let result = can_white_pawn_beat(game_state, &"5_2".to_string());
-    let expeced = (true, vec![("4_3".to_string(), "3_4".to_string())]);
+    let expected = (true, vec![("4_3".to_string(), "3_4".to_string())]);
 
-    assert_eq!(result, expeced);
+    assert_eq!(result, expected);
 }
 
 #[test]
 fn test_get_available_actions_black() {
     let board_state = get_start_board();
 
-    let avaiable_actions = get_available_actions(&GameState {
+    let available_actions = get_available_actions(&GameState {
         player: Player::Black,
         board_state,
     });
 
-    assert_eq!(avaiable_actions.pawns_can_beat.len(), 0);
-    assert_eq!(avaiable_actions.dames_can_move.len(), 0);
-    assert_eq!(avaiable_actions.dames_can_beat.len(), 0);
+    assert_eq!(available_actions.pawns_can_beat.len(), 0);
+    assert_eq!(available_actions.dames_can_move.len(), 0);
+    assert_eq!(available_actions.dames_can_beat.len(), 0);
 
     assert_eq!(
-        avaiable_actions.pawns_can_move.get("3_2").unwrap(),
+        available_actions.pawns_can_move.get("3_2").unwrap(),
         &vec!["4_1".to_string(), "4_3".to_string()]
     );
     assert_eq!(
-        avaiable_actions.pawns_can_move.get("3_4").unwrap(),
+        available_actions.pawns_can_move.get("3_4").unwrap(),
         &vec!["4_3".to_string(), "4_5".to_string()]
     );
     assert_eq!(
-        avaiable_actions.pawns_can_move.get("3_6").unwrap(),
+        available_actions.pawns_can_move.get("3_6").unwrap(),
         &vec!["4_5".to_string(), "4_7".to_string()]
     );
     assert_eq!(
-        avaiable_actions.pawns_can_move.get("3_8").unwrap(),
+        available_actions.pawns_can_move.get("3_8").unwrap(),
         &vec!["4_7".to_string()]
     );
 }
@@ -633,29 +694,29 @@ fn test_get_available_actions_black() {
 fn test_get_available_actions_white() {
     let board_state = get_start_board();
 
-    let avaiable_actions = get_available_actions(&GameState {
+    let available_actions = get_available_actions(&GameState {
         player: Player::White,
         board_state,
     });
 
-    assert_eq!(avaiable_actions.pawns_can_beat.len(), 0);
-    assert_eq!(avaiable_actions.dames_can_move.len(), 0);
-    assert_eq!(avaiable_actions.dames_can_beat.len(), 0);
+    assert_eq!(available_actions.pawns_can_beat.len(), 0);
+    assert_eq!(available_actions.dames_can_move.len(), 0);
+    assert_eq!(available_actions.dames_can_beat.len(), 0);
 
     assert_eq!(
-        avaiable_actions.pawns_can_move.get("6_1").unwrap(),
+        available_actions.pawns_can_move.get("6_1").unwrap(),
         &vec!["5_2".to_string()]
     );
     assert_eq!(
-        avaiable_actions.pawns_can_move.get("6_3").unwrap(),
+        available_actions.pawns_can_move.get("6_3").unwrap(),
         &vec!["5_2".to_string(), "5_4".to_string()]
     );
     assert_eq!(
-        avaiable_actions.pawns_can_move.get("6_5").unwrap(),
+        available_actions.pawns_can_move.get("6_5").unwrap(),
         &vec!["5_4".to_string(), "5_6".to_string()]
     );
     assert_eq!(
-        avaiable_actions.pawns_can_move.get("6_7").unwrap(),
+        available_actions.pawns_can_move.get("6_7").unwrap(),
         &vec!["5_6".to_string(), "5_8".to_string()]
     );
 }
