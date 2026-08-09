@@ -58,12 +58,23 @@ function updateBoard(
           const hasCorrectType = existingPawn.classList.contains(value[1])
           const hasCorrectBaseClass = existingPawn.classList.contains(expectedClass)
           const hasCorrectTestId = existingPawn.getAttribute('data-testid') === expectedClass
+          const hasCorrectWhiteClass =
+            value[0] === Color.White
+              ? existingPawn.classList.contains('White') ||
+                existingPawn.classList.contains(PawnType.PawnWhite)
+              : !existingPawn.classList.contains('White')
 
           const parentSquare = existingPawn.parentElement
           const isChildOfCorrectSquare =
             parentSquare && parentSquare.id === key && parentSquare.classList.contains('square')
 
-          if (hasCorrectType && hasCorrectBaseClass && hasCorrectTestId && isChildOfCorrectSquare) {
+          if (
+            hasCorrectType &&
+            hasCorrectBaseClass &&
+            hasCorrectTestId &&
+            isChildOfCorrectSquare &&
+            hasCorrectWhiteClass
+          ) {
             continue
           }
           console.log(`[updateBoard] DOM mismatch at ${key}, removing and re-adding.`)
@@ -73,6 +84,9 @@ function updateBoard(
         const newPawn = document.createElement('div')
         newPawn.id = key
         newPawn.className = `${expectedClass} ${value[1]}`
+        if (value[0] === Color.White && value[1] === PawnType.Dame) {
+          newPawn.classList.add('White')
+        }
         newPawn.setAttribute('data-testid', `${expectedClass}`)
         newPawn.setAttribute('draggable', 'true')
 
@@ -153,8 +167,13 @@ function drop(event: DragEvent) {
       console.error(`[drop] Draggable element ${draggableElementId} not found in DOM!`)
       return
     }
-    ;(event.currentTarget as HTMLElement)!.appendChild(elementToMove)
-    elementToMove!.id = (event.currentTarget as HTMLElement)!.id
+
+    // Optimization: only append if parent is different
+    const currentTarget = event.currentTarget as HTMLElement
+    if (elementToMove.parentElement !== currentTarget) {
+      currentTarget.appendChild(elementToMove)
+    }
+    elementToMove.id = currentTarget.id
 
     if (checkersRules.canBecomeDame(endX, endY, boardState)) {
       elementToMove.classList.remove('pawn')
@@ -162,6 +181,9 @@ function drop(event: DragEvent) {
       elementToMove.classList.add('dame')
       boardState[targetElementId!][1] = PawnType.Dame
       elementToMove.classList.add(boardState[targetElementId!][1])
+      if (boardState[targetElementId!][0] === Color.White) {
+        elementToMove.classList.add('White')
+      }
       elementToMove.setAttribute('data-testid', 'dame')
     }
 
@@ -222,5 +244,7 @@ function drop(event: DragEvent) {
 </style>
 
 <template>
-  <div v-bind="testId" :class="cls" :id="x + '_' + y" v-on:drop="drop" v-on:dragover="allowDrop" />
+  <div v-bind="testId" :class="cls" :id="x + '_' + y" v-on:drop="drop" v-on:dragover="allowDrop">
+    <slot />
+  </div>
 </template>

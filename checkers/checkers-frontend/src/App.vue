@@ -30,6 +30,11 @@ const setState = (newState: { [key: string]: [Color, PawnType] }) => {
         const hasCorrectType = existingPawn.classList.contains(value[1])
         const hasCorrectBaseClass = existingPawn.classList.contains(expectedClass)
         const hasCorrectTestId = existingPawn.getAttribute('data-testid') === expectedClass
+        const hasCorrectWhiteClass =
+          value[0] === Color.White
+            ? existingPawn.classList.contains('White') ||
+              existingPawn.classList.contains(PawnType.PawnWhite)
+            : !existingPawn.classList.contains('White')
 
         // Ensure it's in the correct square
         const parentSquare = existingPawn.parentElement
@@ -41,7 +46,8 @@ const setState = (newState: { [key: string]: [Color, PawnType] }) => {
           hasCorrectType &&
           hasCorrectBaseClass &&
           hasCorrectTestId &&
-          isChildOfCorrectSquare
+          isChildOfCorrectSquare &&
+          hasCorrectWhiteClass
         ) {
           // DOM is already correct, skip update to avoid disrupting E2E drag-and-drop
           continue
@@ -53,6 +59,9 @@ const setState = (newState: { [key: string]: [Color, PawnType] }) => {
       const newPawn = document.createElement('div')
       newPawn.id = key
       newPawn.className = `${expectedClass} ${value[1]}`
+      if (value[0] === Color.White && value[1] === PawnType.Dame) {
+        newPawn.classList.add('White')
+      }
       newPawn.setAttribute('data-testid', `${expectedClass}`)
       newPawn.setAttribute('draggable', 'true')
 

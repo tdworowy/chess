@@ -25,7 +25,7 @@ test.describe('Checkers Queen E2E', () => {
     await board.setTurn(Color.White)
 
     await board.dragPiceToSquare('2_2', '1_1')
-
+    await page.waitForTimeout(500) // Small wait for DOM update
     await board.assertDameOnSquare('1_1')
 
     // Test Black side promotion
@@ -34,6 +34,7 @@ test.describe('Checkers Queen E2E', () => {
     await board.setBoardState(state)
     await board.setTurn(Color.Black)
     await board.dragPiceToSquare('7_7', '8_8')
+    await page.waitForTimeout(500) // Small wait for DOM update
     await board.assertDameOnSquare('8_8')
   })
 
@@ -54,6 +55,7 @@ test.describe('Checkers Queen E2E', () => {
 
     // Queen move (without beating)
     await board.dragDameToSquare('6_3', '5_2')
+    await page.waitForTimeout(300)
     await board.assertDameOnSquare('5_2')
 
     // Reset for beating test
@@ -61,9 +63,11 @@ test.describe('Checkers Queen E2E', () => {
     state['6_3'] = [Color.White, PawnType.Dame]
     await board.setBoardState(state)
     await board.setTurn(Color.White)
+    await page.waitForTimeout(100)
 
     // Queen beating: (6,3) jumps over (4,5) to (3,6)
     await board.dragDameToSquare('6_3', '3_6')
+    await page.waitForTimeout(500)
     await board.assertDameOnSquare('3_6')
     await board.assertSquareEmpty('6_3')
     await board.assertSquareEmpty('4_5')

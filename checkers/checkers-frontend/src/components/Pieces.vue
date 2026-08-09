@@ -42,11 +42,13 @@ function drag(event: DragEvent) {
 .PawnWhite {
   background-color: #67c964;
 }
-.Dame.PawnBlack {
+.dame.Dame {
   background-color: #270303;
+  border: 2px solid gold;
 }
-.Dame.PawnWhite {
+.dame.Dame.White {
   background-color: #163315;
+  border: 2px solid gold;
 }
 </style>
 

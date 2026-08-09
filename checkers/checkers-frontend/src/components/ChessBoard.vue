@@ -44,22 +44,26 @@ li {
       <li v-for="j in 8" :key="'col-' + i + '-' + j">
         <div v-if="j % 2 == 0">
           <div v-if="i % 2 == 0">
-            <Square :x="i" :y="j" :color="Color.White" />
-            <Pieces :x="i" :y="j" />
+            <Square :x="i" :y="j" :color="Color.White">
+              <Pieces :x="i" :y="j" />
+            </Square>
           </div>
           <div v-else>
-            <Square :x="i" :y="j" :color="Color.Black" />
-            <Pieces :x="i" :y="j" />
+            <Square :x="i" :y="j" :color="Color.Black">
+              <Pieces :x="i" :y="j" />
+            </Square>
           </div>
         </div>
         <div v-else>
           <div v-if="i % 2 == 0">
-            <Square :x="i" :y="j" :color="Color.Black" />
-            <Pieces :x="i" :y="j" />
+            <Square :x="i" :y="j" :color="Color.Black">
+              <Pieces :x="i" :y="j" />
+            </Square>
           </div>
           <div v-else>
-            <Square :x="i" :y="j" :color="Color.White" />
-            <Pieces :x="i" :y="j" />
+            <Square :x="i" :y="j" :color="Color.White">
+              <Pieces :x="i" :y="j" />
+            </Square>
           </div>
         </div>
       </li>

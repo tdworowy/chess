@@ -29,7 +29,7 @@ class PawnsBeatRules {
     let j = startY + 1
     let pawnsFind = 0
     for (let i = startX + 1; i < endX; i++) {
-      if (boardState[`${i}_${j}`][0] === color) {
+      if (boardState[`${i}_${j}`] && boardState[`${i}_${j}`][0] === color) {
         pawnsFind++
       }
       j++
@@ -46,7 +46,7 @@ class PawnsBeatRules {
     let j = startY - 1
     let pawnsFind = 0
     for (let i = startX + 1; i < endX; i++) {
-      if (boardState[`${i}_${j}`][0] === color) {
+      if (boardState[`${i}_${j}`] && boardState[`${i}_${j}`][0] === color) {
         pawnsFind++
       }
       j--
@@ -63,7 +63,7 @@ class PawnsBeatRules {
     let j = startY - 1
     let pawnsFind = 0
     for (let i = startX - 1; i > endX; i--) {
-      if (boardState[`${i}_${j}`][0] === color) {
+      if (boardState[`${i}_${j}`] && boardState[`${i}_${j}`][0] === color) {
         pawnsFind++
       }
       j--
@@ -81,7 +81,7 @@ class PawnsBeatRules {
     let pawnsFind = 0
     for (let i = startX - 1; i > endX; i--) {
       console.log(`${i}_${j}`)
-      if (boardState[`${i}_${j}`][0] === color) {
+      if (boardState[`${i}_${j}`] && boardState[`${i}_${j}`][0] === color) {
         pawnsFind++
       }
       j++
