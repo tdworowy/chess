@@ -50,12 +50,12 @@ export class Api {
   static makeRandomMove(color: Player, boardState: { [key: string]: [Color, PawnType] }) {
     const jsonObj = Api.prepareJson(color, boardState)
     return axios
-      .post('http://localhost:8080/make_radnom_move', JSON.stringify(jsonObj), {
+      .post('http://localhost:8080/make_random_move', JSON.stringify(jsonObj), {
         headers: { 'Content-Type': 'application/json' }
       })
       .then((response) => {
         //console.log(response.data)
-        return Api.parseJson(JSON.parse(response.data).board_state)
+        return Api.parseJson(response.data.board_state)
       })
       .catch((error) => {
         console.log(error)
