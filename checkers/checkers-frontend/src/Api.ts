@@ -39,8 +39,8 @@ export class Api {
         value.pawn_color === Color.Black
           ? PawnType.PawnBlack
           : value.pawn_color === Color.White
-          ? PawnType.PawnWhite
-          : PawnType.Empty
+            ? PawnType.PawnWhite
+            : PawnType.Empty
 
       newBoardState[key] = [colorMap[value.pawn_color as keyof typeof colorMap], pawn_type]
     }
