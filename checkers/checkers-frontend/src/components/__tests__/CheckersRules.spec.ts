@@ -323,5 +323,18 @@ describe('CheckersRules tests', () => {
       expect(checkersRules.canBeat(5, 2, 4, 4, newBoard)).to.be.false
       expect(checkersRules.canBeat(5, 2, 4, 4, newBoard)).to.be.false
     })
+    it('test canBecomeDame - White', () => {
+      const board: { [key: string]: [Color, PawnType] } = {
+        '1_2': [Color.White, PawnType.PawnWhite]
+      }
+      expect(checkersRules.canBecomeDame(1, 2, board)).to.be.true
+    })
+
+    it('test canBecomeDame - Black', () => {
+      const board: { [key: string]: [Color, PawnType] } = {
+        '8_1': [Color.Black, PawnType.PawnBlack]
+      }
+      expect(checkersRules.canBecomeDame(8, 1, board)).to.be.true
+    })
   })
 })

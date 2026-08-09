@@ -15,8 +15,8 @@ const pawnWhite = `pawn ${PawnType.PawnWhite}`
 const testId = { 'data-testid': 'pawn' }
 
 function drag(event: DragEvent) {
-  const { target } = event
-  event.dataTransfer?.setData('id', (<HTMLElement>target)?.id)
+  const target = event.target as HTMLElement
+  event.dataTransfer?.setData('id', target?.id)
 }
 </script>
 

@@ -13,7 +13,7 @@ for (let i = 1; i <= 8; i++) {
   }
 }
 
-const setState: boardStateType = <boardStateType>inject('setState')
+const setState = inject('setState') as boardStateType
 setState(boardArray)
 </script>
 
@@ -40,8 +40,8 @@ li {
 
 <template>
   <div class="container">
-    <ul v-for="i in 8" class="no-bullets">
-      <li v-for="j in 8">
+    <ul v-for="i in 8" :key="'row-' + i" class="no-bullets">
+      <li v-for="j in 8" :key="'col-' + i + '-' + j">
         <div v-if="j % 2 == 0">
           <div v-if="i % 2 == 0">
             <Square :x="i" :y="j" :color="Color.White" />

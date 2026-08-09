@@ -194,7 +194,7 @@ export class CheckersRules {
         boardState[`${x}_${y}`][1] === PawnType.PawnBlack) ||
       (x === 1 &&
         boardState[`${x}_${y}`][0] === Color.White &&
-        boardState[`${x}_${y}`][1] === PawnType.PawnBlack)
+        boardState[`${x}_${y}`][1] === PawnType.PawnWhite)
     )
   }
 }
