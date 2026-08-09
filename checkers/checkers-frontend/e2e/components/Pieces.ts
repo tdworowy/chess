@@ -14,7 +14,8 @@ export class Pieces {
   }
 
   readonly testId = {
-    pawn: 'pawn'
+    pawn: 'pawn',
+    dame: 'dame'
   }
 
   async assertRenderPawns() {

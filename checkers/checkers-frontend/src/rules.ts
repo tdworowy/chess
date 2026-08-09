@@ -181,6 +181,40 @@ export class CheckersRules {
     return this.pawnsBeatRules[pawnType](startX, startY, endX, endY, y, boardState)
   }
 
+  canAnyBeat(x: number, y: number, boardState: { [key: string]: [Color, PawnType] }): boolean {
+    const pawnType = boardState[`${x}_${y}`][1]
+    if (pawnType === PawnType.Empty) return false
+
+    if (pawnType === PawnType.Dame) {
+      for (let dx of [-1, 1]) {
+        for (let dy of [-1, 1]) {
+          for (let dist = 2; dist < 8; dist++) {
+            const endX = x + dx * dist
+            const endY = y + dy * dist
+            if (endX >= 1 && endX <= 8 && endY >= 1 && endY <= 8) {
+              if (this.canBeat(x, y, endX, endY, boardState)) {
+                return true
+              }
+            }
+          }
+        }
+      }
+    } else {
+      for (let dx of [-2, 2]) {
+        for (let dy of [-2, 2]) {
+          const endX = x + dx
+          const endY = y + dy
+          if (endX >= 1 && endX <= 8 && endY >= 1 && endY <= 8) {
+            if (this.canBeat(x, y, endX, endY, boardState)) {
+              return true
+            }
+          }
+        }
+      }
+    }
+    return false
+  }
+
   nextTurn() {
     const temp = this.currentTurnColor
     this.currentTurnColor = this.nextTurnColor
@@ -204,3 +238,7 @@ export const getNewCheckersRules = () => {
 }
 
 export const checkersRules = new CheckersRules()
+
+if (window) {
+  ;(window as any).checkersRules = checkersRules
+}

@@ -16,12 +16,17 @@ const testId = { 'data-testid': 'pawn' }
 
 function drag(event: DragEvent) {
   const target = event.target as HTMLElement
-  event.dataTransfer?.setData('id', target?.id)
+  console.log(`[dragstart] Piece ID: ${target.id}`)
+  event.dataTransfer?.setData('id', target.id)
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+  }
 }
 </script>
 
 <style>
-.pawn {
+.pawn,
+.dame {
   height: 50px;
   width: 50px;
   border-radius: 50%;

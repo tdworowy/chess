@@ -13,7 +13,7 @@ export class ChessBoard {
 
   readonly classes = {
     squareBlack: '.squareBlack',
-    squareWhite: '.squareBlack'
+    squareWhite: '.squareWhite'
   }
 
   readonly testId = {
@@ -54,6 +54,7 @@ export class ChessBoard {
     const pawn = this.page.locator(`[id="${piceId}"][data-testid='${this.pieces.testId.pawn}']`)
     const square = this.page.locator(`[id="${squareId}"][data-testid='${this.testId.square}']`)
 
+    await pawn.waitFor({ state: 'visible' })
     await pawn.dragTo(square)
   }
 
@@ -64,7 +65,40 @@ export class ChessBoard {
     await expect(square.locator(pawnCss)).toBeVisible()
   }
 
+  async assertDameOnSquare(id: string) {
+    const dameCss = `[id="${id}"][data-testid='${this.pieces.testId.dame}']`
+    const square = this.page.locator(`[id="${id}"][data-testid='${this.testId.square}']`)
+
+    await expect(square.locator(dameCss)).toBeVisible()
+  }
+
+  async assertSquareEmpty(id: string) {
+    const square = this.page.locator(`[id="${id}"][data-testid='${this.testId.square}']`)
+    await expect(square.locator('div')).toHaveCount(0)
+  }
+
+  async dragDameToSquare(piceId: string, squareId: string) {
+    const dame = this.page.locator(`[id="${piceId}"][data-testid='${this.pieces.testId.dame}']`)
+    const square = this.page.locator(`[id="${squareId}"][data-testid='${this.testId.square}']`)
+
+    await dame.waitFor({ state: 'visible' })
+    await dame.dragTo(square)
+  }
+
   static getChaseBoard(page: Page) {
     return new ChessBoard(page)
+  }
+
+  async setBoardState(state: any) {
+    await this.page.evaluate((s) => {
+      ;(window as any).setBoardState(s)
+    }, state)
+  }
+
+  async setTurn(color: string) {
+    await this.page.evaluate((c) => {
+      ;(window as any).checkersRules.currentTurnColor = c
+      ;(window as any).checkersRules.nextTurnColor = c === 'White' ? 'Black' : 'White'
+    }, color)
   }
 }

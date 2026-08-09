@@ -6,7 +6,7 @@ import { inject } from 'vue'
 
 const testId = { 'data-testid': 'square' }
 const classBlack = 'square squareBlack'
-const classWhite = ' square squareWhite'
+const classWhite = 'square squareWhite'
 
 const setState = inject('setState') as boardStateType
 const getState = inject('getState') as () => { [key: string]: [Color, PawnType] }
@@ -20,7 +20,19 @@ const props = defineProps<{
 const cls: String = props.color === Color.Black ? classBlack : classWhite
 
 function allowDrop(event: DragEvent) {
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move'
+  }
   event.preventDefault()
+}
+
+function dragStartHandler(event: DragEvent) {
+  const target = event.target as HTMLElement
+  console.log(`[dragstart] Piece ID: ${target.id}`)
+  event.dataTransfer?.setData('id', target.id)
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+  }
 }
 
 function updateBoard(
@@ -29,16 +41,42 @@ function updateBoard(
 ) {
   for (const [key, value] of Object.entries(newBoardState)) {
     if (JSON.stringify(boardState[key]) !== JSON.stringify(value)) {
-      console.log(`${boardState[key]} !== ${value}`)
+      console.log(`[updateBoard] ${boardState[key]} !== ${value}`)
+      const existingPawn = document.querySelector(
+        `[id='${key}'][class*='pawn'], [id='${key}'][class*='dame']`
+      )
+
       if (value[0] == Color.Empty) {
-        document.querySelector(`[id='${key}'][class*='pawn']`)?.remove()
+        if (existingPawn) {
+          console.log(`[updateBoard] Removing pawn from ${key}`)
+          existingPawn.remove()
+        }
       } else {
-        const _class = value[1] === PawnType.Dame ? 'dame' : 'pawn'
+        const expectedClass = value[1] === PawnType.Dame ? 'dame' : 'pawn'
+
+        if (existingPawn) {
+          const hasCorrectType = existingPawn.classList.contains(value[1])
+          const hasCorrectBaseClass = existingPawn.classList.contains(expectedClass)
+          const hasCorrectTestId = existingPawn.getAttribute('data-testid') === expectedClass
+
+          const parentSquare = existingPawn.parentElement
+          const isChildOfCorrectSquare =
+            parentSquare && parentSquare.id === key && parentSquare.classList.contains('square')
+
+          if (hasCorrectType && hasCorrectBaseClass && hasCorrectTestId && isChildOfCorrectSquare) {
+            continue
+          }
+          console.log(`[updateBoard] DOM mismatch at ${key}, removing and re-adding.`)
+          existingPawn.remove()
+        }
+
         const newPawn = document.createElement('div')
         newPawn.id = key
-        newPawn.className = `${_class} ${value[1]}`
-        newPawn.setAttribute('data-testid', `${_class}`)
+        newPawn.className = `${expectedClass} ${value[1]}`
+        newPawn.setAttribute('data-testid', `${expectedClass}`)
         newPawn.setAttribute('draggable', 'true')
+
+        newPawn.addEventListener('dragstart', dragStartHandler)
 
         const square = document.querySelector(`[id='${key}'][class*='square']`)
         square?.appendChild(newPawn)
@@ -46,7 +84,6 @@ function updateBoard(
     }
   }
 }
-// TODO handle DAME
 function beat(
   startX: number,
   startY: number,
@@ -74,60 +111,98 @@ function beat(
   }
 
   boardState[`${x}_${y}`] = [Color.Empty, PawnType.Empty]
-  document.querySelector(`[id='${x}_${y}'][class*='pawn']`)?.remove()
+  console.log(`[beat] Removing pawn from ${x}_${y}`)
+  document
+    .querySelector(`[id='${x}_${y}'][class*='pawn'], [id='${x}_${y}'][class*='dame']`)
+    ?.remove()
   setState(boardState)
 }
 
 function drop(event: DragEvent) {
   let boardState = getState() as { [key: string]: [Color, PawnType] }
 
-  const { target } = event
   event.preventDefault()
   const draggableElementId = event.dataTransfer!.getData('id')
-  const targetElementId = (target as HTMLElement).getAttribute('id')
+  const targetElementId = (event.currentTarget as HTMLElement).getAttribute('id')
 
   const [startX, startY] = draggableElementId.split('_').map((id) => Number(id))
   const [endX, endY] = targetElementId!.split('_').map((id) => Number(id))
 
-  const element = document.querySelector(`[id='${targetElementId}'][class*='pawn']`)
+  const elementOnTarget = document.querySelector(
+    `[id='${targetElementId}'][class*='pawn'], [id='${targetElementId}'][class*='dame']`
+  )
   const canBeat = checkersRules.canBeat(startX, startY, endX, endY, boardState)
 
-  if ((checkersRules.canMove(startX, startY, endX, endY, boardState) && !element) || canBeat) {
+  if (
+    (checkersRules.canMove(startX, startY, endX, endY, boardState) && !elementOnTarget) ||
+    canBeat
+  ) {
     if (canBeat) {
       beat(startX, startY, endX, endY, boardState)
     }
 
+    // Refresh board state after beat
+    boardState = getState() as { [key: string]: [Color, PawnType] }
     boardState[targetElementId!] = boardState[draggableElementId]
     boardState[draggableElementId] = [Color.Empty, PawnType.Empty]
 
-    const element = document.querySelector(
-      `[id='${draggableElementId}'][class*='pawn']`
+    const elementToMove = document.querySelector(
+      `[id='${draggableElementId}'][class*='pawn'], [id='${draggableElementId}'][class*='dame']`
     ) as HTMLElement
-    ;(target as HTMLElement)!.appendChild(element)
-    element!.id = (target as HTMLElement)!.id
+    if (!elementToMove) {
+      console.error(`[drop] Draggable element ${draggableElementId} not found in DOM!`)
+      return
+    }
+    ;(event.currentTarget as HTMLElement)!.appendChild(elementToMove)
+    elementToMove!.id = (event.currentTarget as HTMLElement)!.id
 
     if (checkersRules.canBecomeDame(endX, endY, boardState)) {
-      element.classList.add('dame')
+      elementToMove.classList.remove('pawn')
+      elementToMove.classList.remove(boardState[targetElementId!][1])
+      elementToMove.classList.add('dame')
       boardState[targetElementId!][1] = PawnType.Dame
+      elementToMove.classList.add(boardState[targetElementId!][1])
+      elementToMove.setAttribute('data-testid', 'dame')
     }
 
     setState(boardState)
     // TODO handle player better
     // TODO fix
 
+    if (canBeat && checkersRules.canAnyBeat(endX, endY, boardState)) {
+      console.log(`[drop] Multi-beat available at ${endX}_${endY}, keeping turn.`)
+      return
+    }
+
+    console.log(`[drop] No multi-beat, switching turn.`)
     //AI move
+    if ((window as any).disableAI) {
+      console.log(`[drop] AI disabled, switching turn manually.`)
+      checkersRules.nextTurn()
+      return
+    }
+
+    console.log(`[drop] Triggering AI move.`)
     checkersRules.nextTurn()
-    Api.healtCheck().then((statusCode) => {
-      let boardStateTemp = getState() as { [key: string]: [Color, PawnType] }
-      if (statusCode === 200) {
-        Api.makeRandomMove(Player.Black, boardStateTemp).then((newBoardState) => {
-          //console.log(next_move_json)
-          updateBoard(boardStateTemp, newBoardState)
-          setState(newBoardState)
-        })
+    Api.healtCheck()
+      .then((statusCode) => {
+        let boardStateTemp = getState() as { [key: string]: [Color, PawnType] }
+        if (statusCode === 200) {
+          Api.makeRandomMove(Player.Black, boardStateTemp).then((newBoardState) => {
+            //console.log(next_move_json)
+            updateBoard(boardStateTemp, newBoardState)
+            setState(newBoardState)
+            checkersRules.nextTurn()
+          })
+        } else {
+          // If healthcheck fails (like in E2E tests to skip AI), switch back to player turn
+          checkersRules.nextTurn()
+        }
+      })
+      .catch(() => {
+        // Handle network errors (e.g. aborted requests in tests) by switching back
         checkersRules.nextTurn()
-      }
-    })
+      })
   }
 }
 </script>

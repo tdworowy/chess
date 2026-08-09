@@ -1,8 +1,13 @@
 import { test } from '@playwright/test'
 import { ChessBoard } from './components/ChessBoard'
-import { before } from 'node:test'
 
 test.describe('Game of checkers', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+    await page.evaluate(() => {
+      ;(window as any).disableAI = true
+    })
+  })
   test('Whites can make a move', async ({ page }) => {
     await page.goto('/')
     const chaseBoard = ChessBoard.getChaseBoard(page)
