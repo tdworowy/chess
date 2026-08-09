@@ -250,4 +250,105 @@ describe('Square.vue drop handler', () => {
     expect(boardState['4_5']).toEqual([Color.Empty, PawnType.Empty])
     expect(checkersRules.currentTurnColor).toBe(Color.Black)
   })
+
+  it('should NOT allow move when it is not the players turn', async () => {
+    // Current turn is White, but we try to move a Black piece
+    checkersRules.currentTurnColor = Color.White
+    boardState['6_1'] = [Color.Black, PawnType.PawnBlack]
+
+    const wrapper = createSquareWrapper(7, 2, Color.Black)
+
+    const sourcePiece = document.createElement('div')
+    sourcePiece.id = '6_1'
+    sourcePiece.className = 'pawn PawnBlack'
+    document.body.appendChild(sourcePiece)
+
+    const targetSquare = document.createElement('div')
+    targetSquare.id = '7_2'
+    targetSquare.className = 'square'
+    document.body.appendChild(targetSquare)
+
+    const dragEvent = {
+      preventDefault: vi.fn(),
+      currentTarget: targetSquare,
+      dataTransfer: {
+        getData: vi.fn().mockReturnValue('6_1')
+      }
+    } as unknown as DragEvent
+
+    await (wrapper.vm as any).drop(dragEvent)
+
+    // Move should be rejected
+    expect(boardState['7_2']).toEqual([Color.Empty, PawnType.Empty])
+    expect(boardState['6_1']).toEqual([Color.Black, PawnType.PawnBlack])
+    expect(checkersRules.currentTurnColor).toBe(Color.White)
+  })
+
+  it('should NOT allow moving to an occupied square', async () => {
+    boardState['6_1'] = [Color.White, PawnType.PawnWhite]
+    boardState['5_2'] = [Color.Black, PawnType.PawnBlack]
+
+    const wrapper = createSquareWrapper(5, 2, Color.Black)
+
+    const sourcePiece = document.createElement('div')
+    sourcePiece.id = '6_1'
+    sourcePiece.className = 'pawn PawnWhite'
+    document.body.appendChild(sourcePiece)
+
+    const targetSquare = document.createElement('div')
+    targetSquare.id = '5_2'
+    targetSquare.className = 'square'
+    document.body.appendChild(targetSquare)
+
+    // Add the piece that occupies the target square to DOM
+    const targetPiece = document.createElement('div')
+    targetPiece.id = '5_2'
+    targetPiece.className = 'pawn PawnBlack'
+    targetSquare.appendChild(targetPiece)
+
+    const dragEvent = {
+      preventDefault: vi.fn(),
+      currentTarget: targetSquare,
+      dataTransfer: {
+        getData: vi.fn().mockReturnValue('6_1')
+      }
+    } as unknown as DragEvent
+
+    await (wrapper.vm as any).drop(dragEvent)
+
+    // Move should be rejected
+    expect(boardState['5_2']).toEqual([Color.Black, PawnType.PawnBlack])
+    expect(boardState['6_1']).toEqual([Color.White, PawnType.PawnWhite])
+  })
+
+  it('should NOT allow illegal moves (e.g., jumping over own piece)', async () => {
+    boardState['7_2'] = [Color.White, PawnType.PawnWhite]
+    boardState['6_3'] = [Color.White, PawnType.PawnWhite] // Own piece
+
+    const wrapper = createSquareWrapper(5, 4, Color.Black)
+
+    const sourcePiece = document.createElement('div')
+    sourcePiece.id = '7_2'
+    sourcePiece.className = 'pawn PawnWhite'
+    document.body.appendChild(sourcePiece)
+
+    const targetSquare = document.createElement('div')
+    targetSquare.id = '5_4'
+    targetSquare.className = 'square'
+    document.body.appendChild(targetSquare)
+
+    const dragEvent = {
+      preventDefault: vi.fn(),
+      currentTarget: targetSquare,
+      dataTransfer: {
+        getData: vi.fn().mockReturnValue('7_2')
+      }
+    } as unknown as DragEvent
+
+    await (wrapper.vm as any).drop(dragEvent)
+
+    // Move should be rejected
+    expect(boardState['5_4']).toEqual([Color.Empty, PawnType.Empty])
+    expect(boardState['7_2']).toEqual([Color.White, PawnType.PawnWhite])
+  })
 })
