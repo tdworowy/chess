@@ -152,6 +152,7 @@ export class CheckersRules {
   nextTurnColor = Color.Black
   pawnsMoveRules: PawnsMoveRules = new PawnsMoveRules()
   pawnsBeatRules: PawnsBeatRules = new PawnsBeatRules()
+  mustMovePiece: string | null = null
 
   canMove(
     startX: number,
@@ -160,6 +161,7 @@ export class CheckersRules {
     endY: number,
     boardState: { [key: string]: [Color, PawnType] }
   ): boolean {
+    if (this.mustMovePiece) return false
     const color = boardState[`${startX}_${startY}`][0]
     const pawnType: PawnType = boardState[`${startX}_${startY}`][1]
     if (color !== this.currentTurnColor) return false
@@ -173,6 +175,7 @@ export class CheckersRules {
     endY: number,
     boardState: { [key: string]: [Color, PawnType] }
   ): boolean {
+    if (this.mustMovePiece && this.mustMovePiece !== `${startX}_${startY}`) return false
     const color = boardState[`${startX}_${startY}`][0]
     if (color !== this.currentTurnColor) return false
     const pawnType: PawnType = boardState[`${startX}_${startY}`][1]
@@ -219,6 +222,7 @@ export class CheckersRules {
     const temp = this.currentTurnColor
     this.currentTurnColor = this.nextTurnColor
     this.nextTurnColor = temp
+    this.mustMovePiece = null
   }
 
   canBecomeDame(x: number, y: number, boardState: { [key: string]: [Color, PawnType] }) {

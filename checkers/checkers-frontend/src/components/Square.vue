@@ -193,6 +193,7 @@ function drop(event: DragEvent) {
 
     if (canBeat && checkersRules.canAnyBeat(endX, endY, boardState)) {
       console.log(`[drop] Multi-beat available at ${endX}_${endY}, keeping turn.`)
+      checkersRules.mustMovePiece = `${endX}_${endY}`
       return
     }
 
@@ -216,14 +217,10 @@ function drop(event: DragEvent) {
             setState(newBoardState)
             checkersRules.nextTurn()
           })
-        } else {
-          // If healthcheck fails (like in E2E tests to skip AI), switch back to player turn
-          checkersRules.nextTurn()
         }
       })
       .catch(() => {
-        // Handle network errors (e.g. aborted requests in tests) by switching back
-        checkersRules.nextTurn()
+        // Do nothing, let the turn stay as it is (it's already switched to AI's color)
       })
   }
 }
