@@ -107,6 +107,20 @@ pub fn get_start_board() -> HashMap<String, FieldState> {
     start_board
 }
 
+fn promote_pawn(moved_pawn: FieldState, destination: &str) -> FieldState {
+    if (moved_pawn.pawn_color == PawnColor::Black && destination.starts_with("8_"))
+        || (moved_pawn.pawn_color == PawnColor::White && destination.starts_with("1_"))
+    {
+        FieldState {
+            pawn_type: PawnType::Dame,
+            ..moved_pawn
+        }
+    } else {
+        moved_pawn
+    }
+}
+
+//pub fn make_move(game_state: GameState) -> Option<GameState> {} TODO
 pub fn make_random_move(game_state: GameState) -> Option<GameState> {
     let available_actions: AvailableActions = get_available_actions(&game_state);
     let mut available_actions_types: Vec<ActionType> = Vec::new();
@@ -141,7 +155,9 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
                     let destination = pawn_move.1.choose(&mut rand::rng()).unwrap();
 
                     let dest_field = new_game_state.board_state.get_mut(destination).unwrap();
-                    *dest_field = game_state.board_state.get(&start).unwrap().clone();
+                    let moved_pawn = game_state.board_state.get(&start).unwrap().clone();
+
+                    *dest_field = promote_pawn(moved_pawn, destination);
 
                     let start_field = new_game_state.board_state.get_mut(&start).unwrap();
                     *start_field = FieldState {
@@ -159,7 +175,9 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
                     let destination = pawn_beat.1.choose(&mut rand::rng()).unwrap();
 
                     let dest_field = new_game_state.board_state.get_mut(&destination.1).unwrap();
-                    *dest_field = game_state.board_state.get(&start).unwrap().clone();
+                    let moved_pawn = game_state.board_state.get(&start).unwrap().clone();
+
+                    *dest_field = promote_pawn(moved_pawn, &destination.1);
                     let beating_field = new_game_state.board_state.get_mut(&destination.0).unwrap();
                     *beating_field = FieldState {
                         pawn_color: PawnColor::Empty,
@@ -232,7 +250,7 @@ fn get_available_actions(game_state: &GameState) -> AvailableActions {
         Player::White => PawnColor::White,
     };
 
-    let move_funcion = match game_state.player {
+    let move_function = match game_state.player {
         Player::Black => can_black_pawn_move,
         Player::White => can_white_pawn_move,
     };
@@ -255,7 +273,7 @@ fn get_available_actions(game_state: &GameState) -> AvailableActions {
                     pawn_color: _,
                     pawn_type: PawnType::Pawn,
                 } => {
-                    let can_move = move_funcion(game_state.clone(), &state.0);
+                    let can_move = move_function(game_state.clone(), &state.0);
                     if can_move.0 {
                         match pawns_can_move.entry(state.0.clone()) {
                             Entry::Vacant(e) => {
@@ -726,6 +744,98 @@ fn test_is_position_free() {
     let board_state = get_start_board();
     assert!(is_position_free(&board_state, &"5_2".to_string()));
     assert!(!is_position_free(&board_state, &"6_1".to_string()));
+}
+
+#[test]
+fn test_pawn_promotion() {
+    let mut board_state: HashMap<String, FieldState> = HashMap::new();
+    for i in 1..9 {
+        for j in 1..9 {
+            board_state.insert(
+                format!("{}_{}", i, j),
+                FieldState {
+                    pawn_color: PawnColor::Empty,
+                    pawn_type: PawnType::Empty,
+                },
+            );
+        }
+    }
+
+    // Black pawn at row 7, moving to row 8
+    board_state.insert(
+        "7_2".to_string(),
+        FieldState {
+            pawn_color: PawnColor::Black,
+            pawn_type: PawnType::Pawn,
+        },
+    );
+
+    let game_state = GameState {
+        player: Player::Black,
+        board_state,
+    };
+
+    let new_game_state = make_random_move(game_state).unwrap();
+    let promoted_pawn = new_game_state
+        .board_state
+        .get("8_1")
+        .filter(|f| f.pawn_type != PawnType::Empty)
+        .or(new_game_state
+            .board_state
+            .get("8_3")
+            .filter(|f| f.pawn_type != PawnType::Empty))
+        .unwrap();
+
+    assert_eq!(promoted_pawn.pawn_type, PawnType::Dame);
+    assert_eq!(promoted_pawn.pawn_color, PawnColor::Black);
+}
+
+#[test]
+fn test_pawn_promotion_beat() {
+    let mut board_state: HashMap<String, FieldState> = HashMap::new();
+    for i in 1..9 {
+        for j in 1..9 {
+            board_state.insert(
+                format!("{}_{}", i, j),
+                FieldState {
+                    pawn_color: PawnColor::Empty,
+                    pawn_type: PawnType::Empty,
+                },
+            );
+        }
+    }
+
+    // Black pawn at row 7, beating to row 8
+    board_state.insert(
+        "6_3".to_string(),
+        FieldState {
+            pawn_color: PawnColor::Black,
+            pawn_type: PawnType::Pawn,
+        },
+    );
+    board_state.insert(
+        "7_2".to_string(),
+        FieldState {
+            pawn_color: PawnColor::White,
+            pawn_type: PawnType::Pawn,
+        },
+    );
+
+    let game_state = GameState {
+        player: Player::Black,
+        board_state,
+    };
+
+    let new_game_state = make_random_move(game_state).unwrap();
+    let promoted_pawn = new_game_state.board_state.get("8_1").unwrap();
+
+    assert_eq!(promoted_pawn.pawn_type, PawnType::Dame);
+    assert_eq!(promoted_pawn.pawn_color, PawnColor::Black);
+    // Ensure the beaten pawn is gone
+    assert_eq!(
+        new_game_state.board_state.get("7_2").unwrap().pawn_type,
+        PawnType::Empty
+    );
 }
 
 // TODO dame, random move, 'best" move
