@@ -108,6 +108,9 @@ pub fn get_start_board() -> HashMap<String, FieldState> {
 }
 
 fn promote_pawn(moved_pawn: FieldState, destination: &str) -> FieldState {
+    if moved_pawn.pawn_type != PawnType::Pawn {
+        return moved_pawn;
+    };
     if (moved_pawn.pawn_color == PawnColor::Black && destination.starts_with("8_"))
         || (moved_pawn.pawn_color == PawnColor::White && destination.starts_with("1_"))
     {
@@ -120,7 +123,39 @@ fn promote_pawn(moved_pawn: FieldState, destination: &str) -> FieldState {
     }
 }
 
-//pub fn make_move(game_state: GameState) -> Option<GameState> {} TODO
+fn make_move(game_state: GameState, start: String, destination: String) -> GameState {
+    let mut new_game_state = game_state.clone();
+    let dest_field = new_game_state.board_state.get_mut(&destination).unwrap();
+    let moved_pawn = game_state.board_state.get(&start).unwrap().clone();
+
+    *dest_field = promote_pawn(moved_pawn, &*destination);
+
+    let start_field = new_game_state.board_state.get_mut(&start).unwrap();
+    *start_field = FieldState {
+        pawn_color: PawnColor::Empty,
+        pawn_type: PawnType::Empty,
+    };
+    new_game_state
+}
+fn beat(game_state: GameState, start: String, destination: (String, String)) -> GameState {
+    let mut new_game_state = game_state.clone();
+    let dest_field = new_game_state.board_state.get_mut(&destination.1).unwrap();
+    let moved_pawn = game_state.board_state.get(&start).unwrap().clone();
+
+    *dest_field = promote_pawn(moved_pawn, &destination.1);
+    let beating_field = new_game_state.board_state.get_mut(&destination.0).unwrap();
+    *beating_field = FieldState {
+        pawn_color: PawnColor::Empty,
+        pawn_type: PawnType::Empty,
+    };
+    let start_field = new_game_state.board_state.get_mut(&start).unwrap();
+    *start_field = FieldState {
+        pawn_color: PawnColor::Empty,
+        pawn_type: PawnType::Empty,
+    };
+    new_game_state
+}
+
 pub fn make_random_move(game_state: GameState) -> Option<GameState> {
     let available_actions: AvailableActions = get_available_actions(&game_state);
     let mut available_actions_types: Vec<ActionType> = Vec::new();
@@ -152,18 +187,8 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
                         .choose(&mut rand::rng())
                         .unwrap();
                     let start = pawn_move.0;
-                    let destination = pawn_move.1.choose(&mut rand::rng()).unwrap();
-
-                    let dest_field = new_game_state.board_state.get_mut(destination).unwrap();
-                    let moved_pawn = game_state.board_state.get(&start).unwrap().clone();
-
-                    *dest_field = promote_pawn(moved_pawn, destination);
-
-                    let start_field = new_game_state.board_state.get_mut(&start).unwrap();
-                    *start_field = FieldState {
-                        pawn_color: PawnColor::Empty,
-                        pawn_type: PawnType::Empty,
-                    };
+                    let destination = pawn_move.1.choose(&mut rand::rng())?.to_owned();
+                    new_game_state = make_move(game_state, start, destination);
                 }
                 ActionType::PawnBeat => {
                     let pawn_beat = available_actions
@@ -172,22 +197,9 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
                         .choose(&mut rand::rng())
                         .unwrap();
                     let start = pawn_beat.0;
-                    let destination = pawn_beat.1.choose(&mut rand::rng()).unwrap();
+                    let destination = pawn_beat.1.choose(&mut rand::rng())?.to_owned();
 
-                    let dest_field = new_game_state.board_state.get_mut(&destination.1).unwrap();
-                    let moved_pawn = game_state.board_state.get(&start).unwrap().clone();
-
-                    *dest_field = promote_pawn(moved_pawn, &destination.1);
-                    let beating_field = new_game_state.board_state.get_mut(&destination.0).unwrap();
-                    *beating_field = FieldState {
-                        pawn_color: PawnColor::Empty,
-                        pawn_type: PawnType::Empty,
-                    };
-                    let start_field = new_game_state.board_state.get_mut(&start).unwrap();
-                    *start_field = FieldState {
-                        pawn_color: PawnColor::Empty,
-                        pawn_type: PawnType::Empty,
-                    };
+                    new_game_state = beat(game_state, start, destination)
                 }
                 ActionType::DameMove => {
                     let dame_move = available_actions
@@ -196,16 +208,8 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
                         .choose(&mut rand::rng())
                         .unwrap();
                     let start = dame_move.0;
-                    let destination = dame_move.1.choose(&mut rand::rng()).unwrap();
-
-                    let dest_field = new_game_state.board_state.get_mut(destination).unwrap();
-                    *dest_field = game_state.board_state.get(&start).unwrap().clone();
-
-                    let start_field = new_game_state.board_state.get_mut(&start).unwrap();
-                    *start_field = FieldState {
-                        pawn_color: PawnColor::Empty,
-                        pawn_type: PawnType::Empty,
-                    };
+                    let destination = dame_move.1.choose(&mut rand::rng())?.to_string();
+                    new_game_state = make_move(game_state, start, destination);
                 }
                 ActionType::DameBeat => {
                     let dame_beat = available_actions
@@ -214,20 +218,9 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
                         .choose(&mut rand::rng())
                         .unwrap();
                     let start = dame_beat.0;
-                    let destination = dame_beat.1.choose(&mut rand::rng()).unwrap();
+                    let destination = dame_beat.1.choose(&mut rand::rng())?.to_owned();
 
-                    let dest_field = new_game_state.board_state.get_mut(&destination.1).unwrap();
-                    *dest_field = game_state.board_state.get(&start).unwrap().clone();
-                    let beating_field = new_game_state.board_state.get_mut(&destination.0).unwrap();
-                    *beating_field = FieldState {
-                        pawn_color: PawnColor::Empty,
-                        pawn_type: PawnType::Empty,
-                    };
-                    let start_field = new_game_state.board_state.get_mut(&start).unwrap();
-                    *start_field = FieldState {
-                        pawn_color: PawnColor::Empty,
-                        pawn_type: PawnType::Empty,
-                    };
+                    new_game_state = beat(game_state, start, destination)
                 }
             }
         }
@@ -775,16 +768,8 @@ fn test_pawn_promotion() {
         board_state,
     };
 
-    let new_game_state = make_random_move(game_state).unwrap();
-    let promoted_pawn = new_game_state
-        .board_state
-        .get("8_1")
-        .filter(|f| f.pawn_type != PawnType::Empty)
-        .or(new_game_state
-            .board_state
-            .get("8_3")
-            .filter(|f| f.pawn_type != PawnType::Empty))
-        .unwrap();
+    let new_game_state = make_move(game_state, "7_2".to_string(), "8_1".to_string());
+    let promoted_pawn = new_game_state.board_state.get("8_1").unwrap();
 
     assert_eq!(promoted_pawn.pawn_type, PawnType::Dame);
     assert_eq!(promoted_pawn.pawn_color, PawnColor::Black);
@@ -826,7 +811,11 @@ fn test_pawn_promotion_beat() {
         board_state,
     };
 
-    let new_game_state = make_random_move(game_state).unwrap();
+    let new_game_state = beat(
+        game_state,
+        "6_3".to_string(),
+        ("7_2".to_string(), "8_1".to_string()),
+    );
     let promoted_pawn = new_game_state.board_state.get("8_1").unwrap();
 
     assert_eq!(promoted_pawn.pawn_type, PawnType::Dame);
@@ -837,5 +826,3 @@ fn test_pawn_promotion_beat() {
         PawnType::Empty
     );
 }
-
-// TODO dame, random move, 'best" move
