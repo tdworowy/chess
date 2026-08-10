@@ -3,7 +3,6 @@ import { mount } from '@vue/test-utils'
 import Square from '../Square.vue'
 import { Color, PawnType } from '@/types'
 import { checkersRules } from '@/rules'
-import { Api } from '@/Api'
 
 vi.mock('@/Api', () => ({
   Api: {

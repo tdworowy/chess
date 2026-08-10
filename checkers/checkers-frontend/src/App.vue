@@ -6,7 +6,6 @@ import { Color, PawnType } from './types'
 const boardState = ref<{ [key: string]: [Color, PawnType] }>({})
 
 const setState = (newState: { [key: string]: [Color, PawnType] }) => {
-  const oldState = boardState.value
   boardState.value = { ...newState }
 
   // Update DOM manually for E2E tests and consistency

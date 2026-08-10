@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeAll, beforeEach } from 'vitest'
-import { getNewCheckersRules, CheckersRules } from '../../rules'
+import { getNewCheckersRules, CheckersRules } from '@/rules'
 import { Color, PawnType } from '@/types'
 
 const initBoard: { [key: string]: [Color, PawnType] } = {

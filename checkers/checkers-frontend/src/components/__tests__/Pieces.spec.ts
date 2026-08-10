@@ -25,7 +25,7 @@ describe('Pieces component', () => {
   })
 
   it('renders properly - Dames', () => {
-    vi.spyOn(piecesUtils, 'pieceColorCondiion').mockReturnValue([Color.Black, PawnType.Dame])
+    vi.spyOn(piecesUtils, 'pieceColorCondition').mockReturnValue([Color.Black, PawnType.Dame])
 
     const wrapper = mount(Pieces, {
       props: { x: 0, y: 0 }

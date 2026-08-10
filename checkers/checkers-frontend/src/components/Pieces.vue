@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { Color, PawnType } from '@/types'
-import { pieceColorCondiion } from './../piecesUtils'
+import { pieceColorCondition } from '@/piecesUtils'
 
 const props = defineProps<{
   x: number
   y: number
 }>()
 
-const color = pieceColorCondiion(props.x, props.y)[0]
+const color = pieceColorCondition(props.x, props.y)[0]
 
 const pawnBlack = `pawn ${PawnType.PawnBlack}`
 const pawnWhite = `pawn ${PawnType.PawnWhite}`

@@ -189,8 +189,8 @@ export class CheckersRules {
     if (pawnType === PawnType.Empty) return false
 
     if (pawnType === PawnType.Dame) {
-      for (let dx of [-1, 1]) {
-        for (let dy of [-1, 1]) {
+      for (const dx of [-1, 1]) {
+        for (const dy of [-1, 1]) {
           for (let dist = 2; dist < 8; dist++) {
             const endX = x + dx * dist
             const endY = y + dy * dist
@@ -203,8 +203,8 @@ export class CheckersRules {
         }
       }
     } else {
-      for (let dx of [-2, 2]) {
-        for (let dy of [-2, 2]) {
+      for (const dx of [-2, 2]) {
+        for (const dy of [-2, 2]) {
           const endX = x + dx
           const endY = y + dy
           if (endX >= 1 && endX <= 8 && endY >= 1 && endY <= 8) {

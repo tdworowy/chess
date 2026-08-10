@@ -1,1 +1,3 @@
-TODO add AI
+TODO 
+- add real AI
+- when AI is enable promoting to dame don't work

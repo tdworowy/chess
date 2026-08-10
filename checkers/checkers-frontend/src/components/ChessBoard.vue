@@ -2,14 +2,14 @@
 import { inject } from 'vue'
 import Pieces from './Pieces.vue'
 import Square from './Square.vue'
-import { pieceColorCondiion } from './../piecesUtils'
+import { pieceColorCondition } from '@/piecesUtils'
 import { Color, PawnType, type boardStateType } from '@/types'
 
 let boardArray: { [key: string]: [Color, PawnType] } = {}
 
 for (let i = 1; i <= 8; i++) {
   for (let j = 1; j <= 8; j++) {
-    boardArray[`${i}_${j}`] = pieceColorCondiion(i, j)
+    boardArray[`${i}_${j}`] = pieceColorCondition(i, j)
   }
 }
 
@@ -24,7 +24,6 @@ setState(boardArray)
 }
 
 ul.no-bullets {
-  list-style-type: none;
   padding: 0;
   margin: 0;
   list-style: none;

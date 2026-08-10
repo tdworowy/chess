@@ -207,7 +207,7 @@ function drop(event: DragEvent) {
 
     console.log(`[drop] Triggering AI move.`)
     checkersRules.nextTurn()
-    Api.healtCheck()
+    Api.healthCheck()
       .then((statusCode) => {
         let boardStateTemp = getState() as { [key: string]: [Color, PawnType] }
         if (statusCode === 200) {

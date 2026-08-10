@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest'
-import { getNewCheckersRules, CheckersRules } from '../rules'
-import { Color, PawnType } from '../types'
+import { getNewCheckersRules, CheckersRules } from '@/rules'
+import { Color, PawnType } from '@/types'
 
 describe('CheckersRules.canAnyBeat tests', () => {
   let checkersRules: CheckersRules

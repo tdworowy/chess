@@ -22,8 +22,7 @@ export class Api {
     for (const [key, value] of Object.entries(boardState)) {
       new_board_state[key] = { pawn_color: value[0], pawn_type: pawnMap[value[1]] }
     }
-    const json = { player: color, board_state: new_board_state }
-    return json
+    return { player: color, board_state: new_board_state }
   }
 
   static parseJson(_responseJson: responseJson): { [key: string]: [Color, PawnType] } {
@@ -47,30 +46,29 @@ export class Api {
     return newBoardState
   }
 
-  static makeRandomMove(color: Player, boardState: { [key: string]: [Color, PawnType] }) {
+  static async makeRandomMove(color: Player, boardState: { [key: string]: [Color, PawnType] }) {
     const jsonObj = Api.prepareJson(color, boardState)
-    return axios
-      .post('http://localhost:8080/make_random_move', JSON.stringify(jsonObj), {
-        headers: { 'Content-Type': 'application/json' }
-      })
-      .then((response) => {
-        //console.log(response.data)
-        return Api.parseJson(response.data.board_state)
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+    try {
+      const response = await axios.post(
+        'http://localhost:8080/make_random_move',
+        JSON.stringify(jsonObj),
+        {
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+      return Api.parseJson(response.data.board_state)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
-  static healtCheck() {
-    return axios
-      .get('http://localhost:8080/healthcheck')
-      .then((response) => {
-        console.log(response)
-        return response.status
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+  static async healthCheck() {
+    try {
+      const response = await axios.get('http://localhost:8080/healthcheck')
+      console.log(response)
+      return response.status
+    } catch (error) {
+      console.log(error)
+    }
   }
 }

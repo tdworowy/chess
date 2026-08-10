@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest'
-import { getNewCheckersRules, CheckersRules } from '../../rules'
+import { getNewCheckersRules, CheckersRules } from '@/rules'
 import { Color, PawnType } from '@/types'
 
 describe('Infinite moves bug reproduction', () => {
