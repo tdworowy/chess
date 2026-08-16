@@ -26,18 +26,16 @@ describe('Pieces component', () => {
 
   it('renders properly - Dames', () => {
     vi.spyOn(piecesUtils, 'pieceColorCondition').mockReturnValue([Color.Black, PawnType.Dame])
-
-    const wrapper = mount(Pieces, {
+    mount(Pieces, {
       props: { x: 0, y: 0 }
     })
-
-    // Note: Pieces.vue currently only has templates for PawnBlack and PawnWhite
+// Note: Pieces.vue currently only has templates for PawnBlack and PawnWhite
     // It seems Dame rendering is handled by manual DOM manipulation in Square.vue and App.vue
-    // Let's verify this in Pieces.vue template.
+    // Let's verify this in the Pieces.vue template.
   })
 
   it('does not render when color is empty', () => {
-    // We need to restore the mock if it was set in previous test
+    // We need to restore the mock if it was set in the previous test
     vi.restoreAllMocks()
     const wrapperEmpty = mount(Pieces, {
       props: {

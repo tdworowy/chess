@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject } from 'vue'
+import { inject, onMounted } from 'vue'
 import Pieces from './Pieces.vue'
 import Square from './Square.vue'
 import { pieceColorCondition } from '@/piecesUtils'
@@ -14,7 +14,9 @@ for (let i = 1; i <= 8; i++) {
 }
 
 const setState = inject('setState') as boardStateType
-setState(boardArray)
+onMounted(() => {
+  setState(boardArray)
+})
 </script>
 
 <style>
@@ -41,30 +43,9 @@ li {
   <div class="container">
     <ul v-for="i in 8" :key="'row-' + i" class="no-bullets">
       <li v-for="j in 8" :key="'col-' + i + '-' + j">
-        <div v-if="j % 2 == 0">
-          <div v-if="i % 2 == 0">
-            <Square :x="i" :y="j" :color="Color.White">
-              <Pieces :x="i" :y="j" />
-            </Square>
-          </div>
-          <div v-else>
-            <Square :x="i" :y="j" :color="Color.Black">
-              <Pieces :x="i" :y="j" />
-            </Square>
-          </div>
-        </div>
-        <div v-else>
-          <div v-if="i % 2 == 0">
-            <Square :x="i" :y="j" :color="Color.Black">
-              <Pieces :x="i" :y="j" />
-            </Square>
-          </div>
-          <div v-else>
-            <Square :x="i" :y="j" :color="Color.White">
-              <Pieces :x="i" :y="j" />
-            </Square>
-          </div>
-        </div>
+        <Square :x="i" :y="j" :color="(i + j) % 2 === 0 ? Color.White : Color.Black">
+          <Pieces :x="i" :y="j" />
+        </Square>
       </li>
     </ul>
   </div>

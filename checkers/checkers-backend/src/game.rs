@@ -8,6 +8,15 @@ pub enum Player {
     White,
 }
 
+impl Player {
+    pub fn opposite(&self) -> Self {
+        match self {
+            Player::Black => Player::White,
+            Player::White => Player::Black,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum PawnColor {
     Empty,
@@ -43,10 +52,10 @@ pub struct GameState {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AvailableActions {
-    pawns_can_move: HashMap<String, Vec<String>>,
-    pawns_can_beat: HashMap<String, Vec<(String, String)>>,
-    dames_can_move: HashMap<String, Vec<String>>,
-    dames_can_beat: HashMap<String, Vec<(String, String)>>,
+    pub pawns_can_move: HashMap<String, Vec<String>>,
+    pub pawns_can_beat: HashMap<String, Vec<(String, String)>>,
+    pub dames_can_move: HashMap<String, Vec<String>>,
+    pub dames_can_beat: HashMap<String, Vec<(String, String)>>,
 }
 
 pub fn get_start_board() -> HashMap<String, FieldState> {
@@ -123,7 +132,7 @@ fn promote_pawn(moved_pawn: FieldState, destination: &str) -> FieldState {
     }
 }
 
-fn make_move(game_state: GameState, start: String, destination: String) -> GameState {
+pub fn make_move(game_state: GameState, start: String, destination: String) -> GameState {
     let mut new_game_state = game_state.clone();
     let dest_field = new_game_state.board_state.get_mut(&destination).unwrap();
     let moved_pawn = game_state.board_state.get(&start).unwrap().clone();
@@ -137,7 +146,7 @@ fn make_move(game_state: GameState, start: String, destination: String) -> GameS
     };
     new_game_state
 }
-fn beat(game_state: GameState, start: String, destination: (String, String)) -> GameState {
+pub fn beat(game_state: GameState, start: String, destination: (String, String)) -> GameState {
     let mut new_game_state = game_state.clone();
     let dest_field = new_game_state.board_state.get_mut(&destination.1).unwrap();
     let moved_pawn = game_state.board_state.get(&start).unwrap().clone();
@@ -232,7 +241,7 @@ pub fn make_random_move(game_state: GameState) -> Option<GameState> {
         None
     }
 }
-fn get_available_actions(game_state: &GameState) -> AvailableActions {
+pub fn get_available_actions(game_state: &GameState) -> AvailableActions {
     let mut pawns_can_move: HashMap<String, Vec<String>> = HashMap::new();
     let mut pawns_can_beat: HashMap<String, Vec<(String, String)>> = HashMap::new();
     let mut dames_can_move: HashMap<String, Vec<String>> = HashMap::new();
@@ -517,7 +526,6 @@ fn test_can_black_pawn_move() {
         can_black_pawn_move(game_state.clone(), &"3_8".to_string()),
         (true, vec!["4_7".to_string()])
     );
-
     assert_eq!(
         can_black_pawn_move(game_state.clone(), &"2_1".to_string()),
         (false, vec!["".to_string()])

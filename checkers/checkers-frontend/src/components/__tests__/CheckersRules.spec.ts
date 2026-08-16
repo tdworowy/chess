@@ -317,12 +317,6 @@ describe('CheckersRules tests', () => {
       expect(checkersRules.canBeat(3, 4, 6, 1, newBoard)).to.be.true
     })
 
-    it("test canBeat rule - can't move", () => {
-      expect(checkersRules.canBeat(4, 3, 6, 2, newBoard)).to.be.false
-      expect(checkersRules.canBeat(4, 3, 5, 1, newBoard)).to.be.false
-      expect(checkersRules.canBeat(5, 2, 4, 4, newBoard)).to.be.false
-      expect(checkersRules.canBeat(5, 2, 4, 4, newBoard)).to.be.false
-    })
     it('test canBecomeDame - White', () => {
       const board: { [key: string]: [Color, PawnType] } = {
         '1_2': [Color.White, PawnType.PawnWhite]

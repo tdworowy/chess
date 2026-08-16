@@ -49,7 +49,7 @@ describe('Infinite moves bug reproduction', () => {
     expect(checkersRules.currentTurnColor).toBe(Color.White)
 
     // Now, can White move the OTHER piece at 8_1?
-    // In current implementation, canMove(8, 1, 7, 2, board) will return true because turn is White.
+    // In the current implementation, canMove(8, 1, 7, 2, board) will return true because the turn is White.
     expect(checkersRules.canMove(8, 1, 7, 2, board)).toBe(false)
     expect(checkersRules.canMove(4, 5, 3, 4, board)).toBe(false)
   })

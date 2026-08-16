@@ -251,7 +251,7 @@ describe('Square.vue drop handler', () => {
   })
 
   it('should NOT allow move when it is not the players turn', async () => {
-    // Current turn is White, but we try to move a Black piece
+    // The current turn is White, but we try to move a Black piece
     checkersRules.currentTurnColor = Color.White
     boardState['6_1'] = [Color.Black, PawnType.PawnBlack]
 

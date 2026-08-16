@@ -44,7 +44,7 @@ describe('CheckersRules.canAnyBeat tests', () => {
     // First beat: (7,2) -> (5,4)
     expect(checkersRules.canAnyBeat(7, 2, board)).toBe(true)
 
-    // After first beat:
+    // After the first beat:
     const boardAfterFirstBeat = { ...board }
     boardAfterFirstBeat['7_2'] = [Color.Empty, PawnType.Empty]
     boardAfterFirstBeat['6_3'] = [Color.Empty, PawnType.Empty]

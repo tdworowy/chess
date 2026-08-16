@@ -50,7 +50,7 @@ export class Api {
     const jsonObj = Api.prepareJson(color, boardState)
     try {
       const response = await axios.post(
-        'http://localhost:8080/make_random_move',
+        'http://localhost:8080/make_ai_move',
         JSON.stringify(jsonObj),
         {
           headers: { 'Content-Type': 'application/json' }

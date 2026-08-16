@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { pieceColorCondition, pieceCondition } from '../../piecesUtils'
+import { pieceColorCondition, pieceCondition } from '@/piecesUtils'
 import { Color, PawnType } from '@/types'
 
 describe('Pieces uils', () => {

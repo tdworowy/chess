@@ -1,14 +1,34 @@
 use actix_web::{get, options, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
-use game::{get_start_board, make_random_move, GameState, Player};
+use game::{get_available_actions, get_start_board, make_random_move, GameState, Player};
 
+use crate::ai::get_best_move;
 use crate::game;
 
-#[post("/make_move")]
-pub async fn make_move_api(game_state: web::Json<GameState>) -> impl Responder {
+#[post("/make_ai_move")]
+pub async fn make_ai_move_api(game_state: web::Json<GameState>) -> impl Responder {
     let game_state = game_state.into_inner();
-    HttpResponse::Ok().json(game_state)
+    let actions = get_available_actions(&game_state);
+    let new_game_state = get_best_move(&game_state, &actions, 3);
+    match new_game_state {
+        Some(state) => HttpResponse::Ok()
+            .append_header(("Access-Control-Allow-Origin", "*"))
+            .json(state),
+        None => HttpResponse::BadRequest()
+            .append_header(("Access-Control-Allow-Origin", "*"))
+            .body("No available moves"),
+    }
+}
+
+#[options("/make_ai_move")]
+pub async fn make_ai_move_options_api() -> impl Responder {
+    HttpResponse::Ok()
+        .append_header(("Allow", "OPTIONS, POST"))
+        .append_header(("Access-Control-Allow-Methods", "POST, OPTIONS"))
+        .append_header(("Access-Control-Allow-Headers", "Content-Type"))
+        .append_header(("Access-Control-Allow-Origin", "*"))
+        .finish()
 }
 
 #[post("/make_random_move")]
