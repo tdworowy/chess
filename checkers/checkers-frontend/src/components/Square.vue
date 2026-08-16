@@ -157,7 +157,9 @@ function drop(event: DragEvent) {
 
     // Refresh board state after beat
     boardState = getState() as { [key: string]: [Color, PawnType] }
-    boardState[targetElementId!] = boardState[draggableElementId]
+    // Deep clone the piece state to avoid reference sharing
+    const piece = [...boardState[draggableElementId]] as [Color, PawnType]
+    boardState[targetElementId!] = piece
     boardState[draggableElementId] = [Color.Empty, PawnType.Empty]
 
     const elementToMove = document.querySelector(
@@ -176,11 +178,12 @@ function drop(event: DragEvent) {
     elementToMove.id = currentTarget.id
 
     if (checkersRules.canBecomeDame(endX, endY, boardState)) {
-      elementToMove.classList.remove('pawn')
-      elementToMove.classList.remove(boardState[targetElementId!][1])
-      elementToMove.classList.add('dame')
       boardState[targetElementId!][1] = PawnType.Dame
-      elementToMove.classList.add(boardState[targetElementId!][1])
+      elementToMove.classList.remove('pawn')
+      elementToMove.classList.remove(PawnType.PawnWhite)
+      elementToMove.classList.remove(PawnType.PawnBlack)
+      elementToMove.classList.add('dame')
+      elementToMove.classList.add(PawnType.Dame)
       if (boardState[targetElementId!][0] === Color.White) {
         elementToMove.classList.add('White')
       }

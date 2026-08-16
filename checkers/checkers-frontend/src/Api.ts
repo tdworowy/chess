@@ -34,12 +34,17 @@ export class Api {
 
     const newBoardState = <{ [key: string]: [Color, PawnType] }>{}
     for (const [key, value] of Object.entries(_responseJson)) {
-      const pawn_type =
-        value.pawn_color === Color.Black
-          ? PawnType.PawnBlack
-          : value.pawn_color === Color.White
-            ? PawnType.PawnWhite
-            : PawnType.Empty
+      let pawn_type: PawnType
+      if (value.pawn_type === 'Dame') {
+        pawn_type = PawnType.Dame
+      } else {
+        pawn_type =
+          value.pawn_color === Color.Black
+            ? PawnType.PawnBlack
+            : value.pawn_color === Color.White
+              ? PawnType.PawnWhite
+              : PawnType.Empty
+      }
 
       newBoardState[key] = [colorMap[value.pawn_color as keyof typeof colorMap], pawn_type]
     }

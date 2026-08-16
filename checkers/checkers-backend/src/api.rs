@@ -10,7 +10,7 @@ use crate::game;
 pub async fn make_ai_move_api(game_state: web::Json<GameState>) -> impl Responder {
     let game_state = game_state.into_inner();
     let actions = get_available_actions(&game_state);
-    let new_game_state = get_best_move(&game_state, &actions, 3);
+    let new_game_state = get_best_move(&game_state, &actions, 4);
     match new_game_state {
         Some(state) => HttpResponse::Ok()
             .append_header(("Access-Control-Allow-Origin", "*"))
