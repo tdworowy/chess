@@ -8,7 +8,6 @@ def generate_init_board() -> dict:
             if (i == 1 or i == 3) and j % 2 == 0:
                 result[f"{i}_{j}"] = {"pawn_color": "Black", "pawn_type": "Pawn"}
                 continue
-
             if i == 7 and j % 2 == 0:
                 result[f"{i}_{j}"] = {"pawn_color": "White", "pawn_type": "Pawn"}
                 continue
@@ -19,5 +18,14 @@ def generate_init_board() -> dict:
     return result
 
 
+def generate_init_board_no_empty() -> dict:
+    init_board = generate_init_board()
+    return {
+        position: pawn
+        for position, pawn in init_board.items()
+        if pawn["pawn_color"] != "Empty"
+    }
+
+
 if __name__ == "__main__":
-    print(generate_init_board())
+    print(generate_init_board_no_empty())
