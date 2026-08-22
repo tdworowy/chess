@@ -1,7 +1,7 @@
 use actix_web::{get, options, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
-use game::{get_available_actions, get_start_board, make_random_move, GameState, Player};
+use game::{get_start_board, make_random_move, GameState, Player};
 
 use crate::ai::get_best_move;
 use crate::game;
@@ -9,8 +9,7 @@ use crate::game;
 #[post("/make_ai_move")]
 pub async fn make_ai_move_api(game_state: web::Json<GameState>) -> impl Responder {
     let game_state = game_state.into_inner();
-    let actions = get_available_actions(&game_state);
-    let new_game_state = get_best_move(&game_state, &actions, 5);
+    let new_game_state = get_best_move(&game_state, 8);
     match new_game_state {
         Some(state) => HttpResponse::Ok()
             .append_header(("Access-Control-Allow-Origin", "*"))

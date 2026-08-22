@@ -147,22 +147,76 @@ pub fn make_move(game_state: GameState, start: String, destination: String) -> G
     new_game_state
 }
 pub fn beat(game_state: GameState, start: String, destination: (String, String)) -> GameState {
-    let mut new_game_state = game_state.clone();
-    let dest_field = new_game_state.board_state.get_mut(&destination.1).unwrap();
-    let moved_pawn = game_state.board_state.get(&start).unwrap().clone();
+    let mut state = game_state;
+    let (captured, landing) = destination;
+    let moved_piece = state.board_state.get(&start).unwrap().clone();
 
-    *dest_field = promote_pawn(moved_pawn, &destination.1);
-    let beating_field = new_game_state.board_state.get_mut(&destination.0).unwrap();
-    *beating_field = FieldState {
-        pawn_color: PawnColor::Empty,
-        pawn_type: PawnType::Empty,
+    state
+        .board_state
+        .insert(landing.clone(), promote_pawn(moved_piece, &landing));
+
+    state.board_state.insert(
+        captured,
+        FieldState {
+            pawn_color: PawnColor::Empty,
+            pawn_type: PawnType::Empty,
+        },
+    );
+    state.board_state.insert(
+        start,
+        FieldState {
+            pawn_color: PawnColor::Empty,
+            pawn_type: PawnType::Empty,
+        },
+    );
+
+    state
+}
+fn get_piece_captures(game_state: &GameState, position: &str) -> Vec<(String, String)> {
+    let field = game_state.board_state.get(position).unwrap();
+    let pawn_color = match game_state.player {
+        Player::Black => PawnColor::Black,
+        Player::White => PawnColor::White,
     };
-    let start_field = new_game_state.board_state.get_mut(&start).unwrap();
-    *start_field = FieldState {
-        pawn_color: PawnColor::Empty,
-        pawn_type: PawnType::Empty,
+    let captures = match field.pawn_type {
+        PawnType::Pawn => {
+            let result = can_pawn_beat(&game_state, &position.to_string(), &pawn_color);
+
+            if result.0 {
+                result.1
+            } else {
+                Vec::new()
+            }
+        }
+        PawnType::Dame => {
+            let result = can_dame_beat(game_state.clone(), &position.to_string());
+
+            if result.0 {
+                result.1
+            } else {
+                Vec::new()
+            }
+        }
+        _ => Vec::new(),
     };
-    new_game_state
+
+    captures
+}
+pub fn generate_capture_sequences(
+    game_state: GameState,
+    position: String,
+    states: &mut Vec<GameState>,
+) {
+    let captures = get_piece_captures(&game_state, &position);
+    if captures.is_empty() {
+        states.push(game_state);
+        return;
+    }
+    for capture in captures {
+        let next_position = capture.1.clone();
+        let next_state = beat(game_state.clone(), position.clone(), capture);
+        generate_capture_sequences(next_state, next_position, states);
+    }
 }
 
 pub fn make_random_move(game_state: GameState) -> Option<GameState> {
@@ -251,17 +305,6 @@ pub fn get_available_actions(game_state: &GameState) -> AvailableActions {
         Player::Black => PawnColor::Black,
         Player::White => PawnColor::White,
     };
-
-    let move_function = match game_state.player {
-        Player::Black => can_black_pawn_move,
-        Player::White => can_white_pawn_move,
-    };
-
-    let beat_function = match game_state.player {
-        Player::Black => can_black_pawn_beat,
-        Player::White => can_white_pawn_beat,
-    };
-
     game_state
         .clone()
         .board_state
@@ -275,18 +318,18 @@ pub fn get_available_actions(game_state: &GameState) -> AvailableActions {
                     pawn_color: _,
                     pawn_type: PawnType::Pawn,
                 } => {
-                    let can_move = move_function(game_state.clone(), &state.0);
-                    if can_move.0 {
+                    let moves = can_pawn_move(game_state, &state.0, &pawn_color);
+                    if !moves.is_empty() {
                         match pawns_can_move.entry(state.0.clone()) {
                             Entry::Vacant(e) => {
-                                e.insert(can_move.1.clone());
+                                e.insert(moves.clone());
                             }
                             Entry::Occupied(mut e) => {
-                                e.get_mut().extend(can_move.1.clone());
+                                e.get_mut().extend(moves.clone());
                             }
                         }
                     }
-                    let can_beat = beat_function(game_state.clone(), &state.0);
+                    let can_beat = can_pawn_beat(game_state, &state.0, &pawn_color);
                     if can_beat.0 {
                         match pawns_can_beat.entry(state.0) {
                             Entry::Vacant(e) => {
@@ -346,166 +389,211 @@ fn is_position_free(board_state: &HashMap<String, FieldState>, position: &String
     }
 }
 
-fn can_black_pawn_move(game_state: GameState, position: &String) -> (bool, Vec<String>) {
-    let _position: Vec<&str> = position.split("_").collect();
-    let mut next_positions: Vec<String> = Vec::new();
+fn can_pawn_move(game_state: &GameState, position: &str, pawn_color: &PawnColor) -> Vec<String> {
+    let parts: Vec<&str> = position.split('_').collect();
 
-    let x: u32 = _position[0].parse().expect("not a number");
-    let y: u32 = _position[1].parse().expect("not a number");
-    if x < 8 && y - 1 > 0 {
-        let next_position = format!("{}_{}", x + 1, y - 1);
+    let x: i32 = parts[0].parse().expect("not a number");
+    let y: i32 = parts[1].parse().expect("not a number");
+
+    let dx = match pawn_color {
+        PawnColor::Black => 1,
+        PawnColor::White => -1,
+        PawnColor::Empty => return Vec::new(),
+    };
+    let mut moves = Vec::new();
+    for dy in [-1, 1] {
+        let nx = x + dx;
+        let ny = y + dy;
+
+        if !(1..=8).contains(&nx) || !(1..=8).contains(&ny) {
+            continue;
+        }
+
+        let next_position = format!("{}_{}", nx, ny);
         if is_position_free(&game_state.board_state, &next_position) {
-            next_positions.push(next_position);
+            moves.push(next_position);
         }
     }
+    moves
+}
 
-    if x < 8 && y + 1 <= 8 {
-        let next_position = format!("{}_{}", x + 1, y + 1);
-        if is_position_free(&game_state.board_state, &next_position) {
-            next_positions.push(next_position);
+fn can_pawn_beat(
+    game_state: &GameState,
+    position: &String,
+    pawn_color: &PawnColor,
+) -> (bool, Vec<(String, String)>) {
+    let parts: Vec<&str> = position.split('_').collect();
+
+    let x: i32 = parts[0].parse().expect("not a number");
+    let y: i32 = parts[1].parse().expect("not a number");
+
+    let (my_color, opponent_color, dx) = match pawn_color {
+        PawnColor::Black => (PawnColor::Black, PawnColor::White, 1),
+        PawnColor::White => (PawnColor::White, PawnColor::Black, -1),
+        PawnColor::Empty => {
+            unreachable!()
         }
     };
-    if next_positions.len() > 0 {
-        (true, next_positions)
+    let mut captures = Vec::new();
+    for dy in [-1, 1] {
+        let enemy_x = x + dx;
+        let enemy_y = y + dy;
+
+        let landing_x = x + 2 * dx;
+        let landing_y = y + 2 * dy;
+
+        // Check board boundaries.
+        if !(0..8).contains(&enemy_x)
+            || !(0..8).contains(&enemy_y)
+            || !(0..8).contains(&landing_x)
+            || !(0..8).contains(&landing_y)
+        {
+            continue;
+        }
+
+        let enemy_position = format!("{}_{}", enemy_x, enemy_y);
+        let landing_position = format!("{}_{}", landing_x, landing_y);
+        // There must be an opponent on the middle square.
+        let is_opponent = matches!(
+            game_state.board_state.get(&enemy_position),
+            Some(FieldState {
+                pawn_color,
+                pawn_type: PawnType::Pawn | PawnType::Dame,
+            }) if *pawn_color == opponent_color
+        );
+
+        if !is_opponent {
+            continue;
+        }
+        // Landing square must be empty.
+        if is_position_free(&game_state.board_state, &landing_position) {
+            captures.push((enemy_position, landing_position));
+        }
+    }
+    if captures.is_empty() {
+        (false, Vec::new())
     } else {
-        (false, vec!["".to_string()])
+        (true, captures)
     }
 }
 
-fn can_white_pawn_move(game_state: GameState, position: &String) -> (bool, Vec<String>) {
-    let _position: Vec<&str> = position.split("_").collect();
-    let mut next_positions: Vec<String> = Vec::new();
-    let x: u32 = _position[0].parse().expect("not a number");
-    let y: u32 = _position[1].parse().expect("not a number");
-    if x > 1 && y > 1 {
-        let next_position = format!("{}_{}", x - 1, y - 1);
-        if is_position_free(&game_state.board_state, &next_position) {
-            next_positions.push(next_position);
-        }
-    };
-    if x > 1 && y < 8 {
-        let next_position = format!("{}_{}", x - 1, y + 1);
-        if is_position_free(&game_state.board_state, &next_position) {
-            next_positions.push(next_position);
-        }
-    };
+fn can_dame_move(game_state: GameState, position: &String) -> (bool, Vec<String>) {
+    let parts: Vec<&str> = position.split('_').collect();
 
-    if next_positions.len() > 0 {
-        (true, next_positions)
+    let x: i32 = parts[0].parse().expect("not a number");
+    let y: i32 = parts[1].parse().expect("not a number");
+
+    let directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)];
+
+    let mut destinations = Vec::new();
+    for (dx, dy) in directions {
+        let mut nx = x + dx;
+        let mut ny = y + dy;
+
+        while (0..8).contains(&nx) && (0..8).contains(&ny) {
+            let position = format!("{}_{}", nx, ny);
+
+            if !is_position_free(&game_state.board_state, &position) {
+                break;
+            }
+            destinations.push(position);
+            nx += dx;
+            ny += dy;
+        }
+    }
+    if destinations.is_empty() {
+        (false, Vec::new())
     } else {
-        (false, vec!["".to_string()])
+        (true, destinations)
     }
 }
+fn can_dame_beat(game_state: GameState, position: &String) -> (bool, Vec<(String, String)>) {
+    let parts: Vec<&str> = position.split('_').collect();
 
-fn can_black_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(String, String)>) {
-    let _position: Vec<&str> = position.split("_").collect();
-    let mut enemy_and_next_positions: Vec<(String, String)> = Vec::new();
+    let x: i32 = parts[0].parse().expect("not a number");
+    let y: i32 = parts[1].parse().expect("not a number");
 
-    let x: u32 = _position[0].parse().expect("not a number");
-    let y: u32 = _position[1].parse().expect("not a number");
-    if x < 7 && y - 1 > 1 {
-        let enemy_position = format!("{}_{}", x + 1, y - 1);
-        match game_state.board_state.get(&enemy_position) {
-            Some(state) => match state {
-                FieldState {
-                    pawn_type: PawnType::Pawn,
-                    pawn_color: PawnColor::White,
-                } => {
-                    let new_position = format!("{}_{}", x + 2, y - 2);
-                    if is_position_free(&game_state.board_state, &new_position) {
-                        enemy_and_next_positions.push((enemy_position, new_position));
-                    }
+    let my_color = match game_state.player {
+        Player::Black => PawnColor::Black,
+        Player::White => PawnColor::White,
+    };
+
+    let opponent_color = match game_state.player {
+        Player::Black => PawnColor::White,
+        Player::White => PawnColor::Black,
+    };
+
+    let directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)];
+
+    let mut captures = Vec::new();
+
+    for (dx, dy) in directions {
+        let mut nx = x + dx;
+        let mut ny = y + dy;
+
+        // Before encountering an opponent, there may only be
+        // empty squares.
+        while (0..8).contains(&nx) && (0..8).contains(&ny) {
+            let current_position = format!("{}_{}", nx, ny);
+
+            match game_state.board_state.get(&current_position) {
+                None => {
+                    break;
                 }
-                _ => {}
-            },
-            None => {}
-        }
-    };
-    if x < 7 && y + 1 < 8 {
-        let enemy_position = format!("{}_{}", x + 1, y + 1);
-        match game_state.board_state.get(&enemy_position) {
-            Some(state) => {
-                match state {
-                    FieldState {
-                        pawn_type: PawnType::Pawn,
-                        pawn_color: PawnColor::White,
-                    } => {
-                        let new_position = format!("{}_{}", x + 2, y + 2);
-                        if is_position_free(&game_state.board_state, &new_position) {
-                            enemy_and_next_positions.push((enemy_position, new_position));
+                Some(FieldState {
+                    pawn_color: PawnColor::Empty,
+                    ..
+                }) => {
+                    nx += dx;
+                    ny += dy;
+                }
+                Some(FieldState { pawn_color, .. }) if *pawn_color == my_color => {
+                    // Own piece blocks this direction.
+                    break;
+                }
+                Some(FieldState { pawn_color, .. }) if *pawn_color == opponent_color => {
+                    // Found an opponent.
+                    let enemy_position = current_position;
+
+                    // Now look for every possible landing square
+                    // beyond the opponent.
+                    nx += dx;
+                    ny += dy;
+
+                    while (0..8).contains(&nx) && (0..8).contains(&ny) {
+                        let landing_position = format!("{}_{}", nx, ny);
+
+                        match game_state.board_state.get(&landing_position) {
+                            Some(FieldState {
+                                pawn_color: PawnColor::Empty,
+                                ..
+                            }) => {
+                                captures.push((enemy_position.clone(), landing_position));
+                            }
+                            _ => {
+                                // Any piece beyond the captured
+                                // piece blocks further landing squares.
+                                break;
+                            }
                         }
+
+                        nx += dx;
+                        ny += dy;
                     }
-                    _ => {}
-                };
+                    // We can encounter only one enemy in this
+                    // direction during a single jump.
+                    break;
+                }
+
+                _ => break,
             }
-            None => {}
         }
-    };
-    if enemy_and_next_positions.len() > 0 {
-        (true, enemy_and_next_positions)
-    } else {
-        (false, vec![("".to_string(), "".to_string())])
     }
-}
-
-fn can_white_pawn_beat(game_state: GameState, position: &String) -> (bool, Vec<(String, String)>) {
-    let _position: Vec<&str> = position.split("_").collect();
-    let mut enemy_and_next_positions: Vec<(String, String)> = Vec::new();
-
-    let x: u32 = _position[0].parse().expect("not a number");
-    let y: u32 = _position[1].parse().expect("not a number");
-    if x > 2 && y > 2 {
-        let enemy_position = format!("{}_{}", x - 1, y - 1);
-        match game_state.board_state.get(&enemy_position) {
-            Some(state) => {
-                match state {
-                    FieldState {
-                        pawn_type: PawnType::Pawn,
-                        pawn_color: PawnColor::Black,
-                    } => {
-                        let new_position = format!("{}_{}", x - 2, y - 2);
-                        if is_position_free(&game_state.board_state, &new_position) {
-                            enemy_and_next_positions.push((enemy_position, new_position));
-                        }
-                    }
-                    _ => {}
-                };
-            }
-            None => {}
-        };
-    };
-    if x > 2 && y < 7 {
-        let enemy_position = format!("{}_{}", x - 1, y + 1);
-        match game_state.board_state.get(&enemy_position) {
-            Some(state) => {
-                match state {
-                    FieldState {
-                        pawn_type: PawnType::Pawn,
-                        pawn_color: PawnColor::Black,
-                    } => {
-                        let new_position = format!("{}_{}", x - 2, y + 2);
-                        if is_position_free(&game_state.board_state, &new_position) {
-                            enemy_and_next_positions.push((enemy_position, new_position));
-                        }
-                    }
-                    _ => {}
-                };
-            }
-            None => {}
-        }
-    };
-    if enemy_and_next_positions.len() > 0 {
-        (true, enemy_and_next_positions)
+    if captures.is_empty() {
+        (false, Vec::new())
     } else {
-        (false, vec![("".to_string(), "".to_string())])
+        (true, captures)
     }
-}
-
-fn can_dame_move(_game_state: GameState, _position: &String) -> (bool, Vec<String>) {
-    (false, vec!["".to_string()])
-}
-fn can_dame_beat(_game_state: GameState, _position: &String) -> (bool, Vec<(String, String)>) {
-    (false, vec![("".to_string(), "".to_string())])
 }
 
 #[test]
@@ -515,29 +603,20 @@ fn test_can_black_pawn_move() {
         board_state: get_start_board(),
     };
     assert_eq!(
-        can_black_pawn_move(game_state.clone(), &"3_2".to_string()),
-        (true, vec!["4_1".to_string(), "4_3".to_string()])
+        can_pawn_move(&game_state, &"3_2".to_string(), &PawnColor::Black),
+        vec!["4_1".to_string(), "4_3".to_string()]
     );
     assert_eq!(
-        can_black_pawn_move(game_state.clone(), &"3_4".to_string()),
-        (true, vec!["4_3".to_string(), "4_5".to_string()])
+        can_pawn_move(&game_state, &"3_4".to_string(), &PawnColor::Black),
+        vec!["4_3".to_string(), "4_5".to_string()]
     );
     assert_eq!(
-        can_black_pawn_move(game_state.clone(), &"3_8".to_string()),
-        (true, vec!["4_7".to_string()])
+        can_pawn_move(&game_state, &"3_8".to_string(), &PawnColor::Black),
+        vec!["4_7".to_string()]
     );
-    assert_eq!(
-        can_black_pawn_move(game_state.clone(), &"2_1".to_string()),
-        (false, vec!["".to_string()])
-    );
-    assert_eq!(
-        can_black_pawn_move(game_state.clone(), &"2_3".to_string()),
-        (false, vec!["".to_string()])
-    );
-    assert_eq!(
-        can_black_pawn_move(game_state.clone(), &"2_7".to_string()),
-        (false, vec!["".to_string()])
-    );
+    assert!(can_pawn_move(&game_state, &"2_1".to_string(), &PawnColor::Black).is_empty());
+    assert!(can_pawn_move(&game_state, &"2_3".to_string(), &PawnColor::Black).is_empty());
+    assert!(can_pawn_move(&game_state, &"2_7".to_string(), &PawnColor::Black).is_empty());
 }
 
 #[test]
@@ -547,29 +626,20 @@ fn test_can_white_pawn_move() {
         board_state: get_start_board(),
     };
     assert_eq!(
-        can_white_pawn_move(game_state.clone(), &"6_1".to_string()),
-        (true, vec!["5_2".to_string()])
+        can_pawn_move(&game_state, &"6_1".to_string(), &PawnColor::White),
+        vec!["5_2".to_string()]
     );
     assert_eq!(
-        can_white_pawn_move(game_state.clone(), &"6_3".to_string()),
-        (true, vec!["5_2".to_string(), "5_4".to_string()])
+        can_pawn_move(&game_state, &"6_3".to_string(), &PawnColor::White),
+        vec!["5_2".to_string(), "5_4".to_string()]
     );
     assert_eq!(
-        can_white_pawn_move(game_state.clone(), &"6_7".to_string()),
-        (true, vec!["5_6".to_string(), "5_8".to_string()])
+        can_pawn_move(&game_state, &"6_7".to_string(), &PawnColor::White),
+        vec!["5_6".to_string(), "5_8".to_string()]
     );
-    assert_eq!(
-        can_white_pawn_move(game_state.clone(), &"7_2".to_string()),
-        (false, vec!["".to_string()])
-    );
-    assert_eq!(
-        can_white_pawn_move(game_state.clone(), &"7_4".to_string()),
-        (false, vec!["".to_string()])
-    );
-    assert_eq!(
-        can_white_pawn_move(game_state.clone(), &"7_8".to_string()),
-        (false, vec!["".to_string()])
-    );
+    assert!(can_pawn_move(&game_state, &"7_2".to_string(), &PawnColor::White).is_empty());
+    assert!(can_pawn_move(&game_state, &"7_4".to_string(), &PawnColor::White).is_empty(),);
+    assert!(can_pawn_move(&game_state, &"7_8".to_string(), &PawnColor::White).is_empty(),);
 }
 
 #[test]
@@ -629,7 +699,7 @@ fn test_can_black_pawn_beat() {
         board_state,
     };
 
-    let result = can_black_pawn_beat(game_state, &"4_3".to_string());
+    let result = can_pawn_beat(&game_state, &"4_3".to_string(), &PawnColor::Black);
     let expected = (true, vec![("5_2".to_string(), "6_1".to_string())]);
 
     assert_eq!(result, expected);
@@ -672,7 +742,7 @@ fn test_can_white_pawn_beat() {
         board_state,
     };
 
-    let result = can_white_pawn_beat(game_state, &"5_2".to_string());
+    let result = can_pawn_beat(&game_state, &"5_2".to_string(), &PawnColor::White);
     let expected = (true, vec![("4_3".to_string(), "3_4".to_string())]);
 
     assert_eq!(result, expected);
