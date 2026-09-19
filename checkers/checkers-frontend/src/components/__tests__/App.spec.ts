@@ -10,8 +10,8 @@ describe('App.vue integration and DOM sync', () => {
 
   it('should synchronize DOM when setState is called', async () => {
     // We need some squares in the DOM for setState to work
-    for (let i = 0; i < 2; i++) {
-      for (let j = 0; j < 2; j++) {
+    for (let i = 1; i <= 8; i++) {
+      for (let j = 1; j <= 8; j++) {
         const square = document.createElement('div')
         square.id = `${i}_${j}`
         square.className = 'square'
@@ -23,56 +23,56 @@ describe('App.vue integration and DOM sync', () => {
     const setState = (wrapper.vm as any).setState
 
     const newState = {
-      '0_0': [Color.White, PawnType.PawnWhite],
-      '0_1': [Color.Black, PawnType.PawnBlack],
-      '1_0': [Color.White, PawnType.Dame],
-      '1_1': [Color.Empty, PawnType.Empty]
+      '1_1': [Color.White, PawnType.PawnWhite],
+      '1_2': [Color.Black, PawnType.PawnBlack],
+      '2_1': [Color.White, PawnType.Dame],
+      '2_2': [Color.Empty, PawnType.Empty]
     }
 
     setState(newState)
 
     // Verify pieces are added to DOM
-    const p00 = document.getElementById('0_0')?.querySelector('.pawn.PawnWhite')
-    expect(p00).toBeTruthy()
-    expect(p00?.getAttribute('data-testid')).toBe('pawn')
+    const p11 = document.getElementById('1_1')?.querySelector('.pawn.PawnWhite')
+    expect(p11).toBeTruthy()
+    expect(p11?.getAttribute('data-testid')).toBe('pawn')
 
-    const p01 = document.getElementById('0_1')?.querySelector('.pawn.PawnBlack')
-    expect(p01).toBeTruthy()
+    const p12 = document.getElementById('1_2')?.querySelector('.pawn.PawnBlack')
+    expect(p12).toBeTruthy()
 
-    const p10 = document.getElementById('1_0')?.querySelector('.dame.Dame')
-    expect(p10).toBeTruthy()
-    expect(p10?.getAttribute('data-testid')).toBe('dame')
+    const p21 = document.getElementById('2_1')?.querySelector('.dame.Dame')
+    expect(p21).toBeTruthy()
+    expect(p21?.getAttribute('data-testid')).toBe('dame')
 
     // Verify empty square
-    const s11 = document.getElementById('1_1')
-    expect(s11?.querySelector('.pawn, .dame')).toBeFalsy()
+    const s22 = document.getElementById('2_2')
+    expect(s22?.querySelector('.pawn, .dame')).toBeFalsy()
 
     // Test idempotency: calling setState again with same state shouldn't recreate elements
-    const p00_before = document.getElementById('0_0')?.querySelector('.pawn.PawnWhite')
+    const p11_before = document.getElementById('1_1')?.querySelector('.pawn.PawnWhite')
     setState(newState)
-    const p00_after = document.getElementById('0_0')?.querySelector('.pawn.PawnWhite')
-    expect(p00_before).toBe(p00_after)
+    const p11_after = document.getElementById('1_1')?.querySelector('.pawn.PawnWhite')
+    expect(p11_before).toBe(p11_after)
 
     // Update state: remove one piece, change another
     const nextState = {
-      '0_0': [Color.Empty, PawnType.Empty],
-      '0_1': [Color.White, PawnType.Dame], // Changed from Black Pawn to White Dame
-      '1_0': [Color.White, PawnType.Dame],
-      '1_1': [Color.Empty, PawnType.Empty]
+      '1_1': [Color.Empty, PawnType.Empty],
+      '1_2': [Color.White, PawnType.Dame], // Changed from Black Pawn to White Dame
+      '2_1': [Color.White, PawnType.Dame],
+      '2_2': [Color.Empty, PawnType.Empty]
     }
 
     setState(nextState)
 
-    expect(document.getElementById('0_0')?.querySelector('.pawn')).toBeFalsy()
-    const p01_new = document.getElementById('0_1')?.querySelector('.dame.Dame')
-    expect(p01_new).toBeTruthy()
-    expect(p01_new?.classList.contains('White')).toBe(true)
+    expect(document.getElementById('1_1')?.querySelector('.pawn')).toBeFalsy()
+    const p12_new = document.getElementById('1_2')?.querySelector('.dame.Dame')
+    expect(p12_new).toBeTruthy()
+    expect(p12_new?.classList.contains('White')).toBe(true)
 
     // Verify event listeners (dragstart) are added
     const dragStartEvent = new Event('dragstart')
     const spy = vi.fn()
-    p01_new?.addEventListener('dragstart', spy)
-    p01_new?.dispatchEvent(dragStartEvent)
+    p12_new?.addEventListener('dragstart', spy)
+    p12_new?.dispatchEvent(dragStartEvent)
     expect(spy).toHaveBeenCalled()
   })
 })

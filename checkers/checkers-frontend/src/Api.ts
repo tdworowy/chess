@@ -37,8 +37,8 @@ export class Api {
     for (const [key, value] of Object.entries(_responseJson)) {
       temp[key] = value
     }
-    for (let i = 0; i < 8; i++) {
-      for (let j = 0; j < 8; j++) {
+    for (let i = 1; i <= 8; i++) {
+      for (let j = 1; j <= 8; j++) {
         const key = `${i}_${j}`
         const value = temp[key]
         let pawn_type: PawnType
