@@ -33,20 +33,31 @@ export class Api {
     }
 
     const newBoardState = <{ [key: string]: [Color, PawnType] }>{}
+    const temp: { [key: string]: { pawn_color: string; pawn_type: string } } = {}
     for (const [key, value] of Object.entries(_responseJson)) {
-      let pawn_type: PawnType
-      if (value.pawn_type === 'Dame') {
-        pawn_type = PawnType.Dame
-      } else {
-        pawn_type =
-          value.pawn_color === Color.Black
-            ? PawnType.PawnBlack
-            : value.pawn_color === Color.White
-              ? PawnType.PawnWhite
-              : PawnType.Empty
-      }
+      temp[key] = value
+    }
+    for (let i = 1; i <= 8; i++) {
+      for (let j = 1; j <= 8; j++) {
+        const key = `${i}_${j}`
+        const value = temp[key]
+        let pawn_type: PawnType
+        const pawn_color = value?.pawn_color || 'Empty'
+        if (!value) {
+          pawn_type = PawnType.Empty
+        } else if (value.pawn_type === 'Dame') {
+          pawn_type = PawnType.Dame
+        } else {
+          pawn_type =
+            value.pawn_color === Color.Black
+              ? PawnType.PawnBlack
+              : value.pawn_color === Color.White
+                ? PawnType.PawnWhite
+                : PawnType.Empty
+        }
 
-      newBoardState[key] = [colorMap[value.pawn_color as keyof typeof colorMap], pawn_type]
+        newBoardState[key] = [colorMap[pawn_color as keyof typeof colorMap], pawn_type]
+      }
     }
     return newBoardState
   }

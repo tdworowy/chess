@@ -180,7 +180,6 @@ export class CheckersRules {
     if (color !== this.currentTurnColor) return false
     const pawnType: PawnType = boardState[`${startX}_${startY}`][1]
     const y = startY > endY ? startY - 1 : startY + 1
-
     return this.pawnsBeatRules[pawnType](startX, startY, endX, endY, y, boardState)
   }
 
