@@ -24,9 +24,10 @@ test.describe('Checkers Game E2E', () => {
 
     await board.setBoardState(state)
     await board.setTurn(Color.White)
-    await page.waitForTimeout(100)
+    await page.waitForTimeout(1000)
+
     await board.dragPiceToSquare('5_2', '3_4')
-    await page.waitForTimeout(300)
+    await page.waitForTimeout(1000)
 
     await board.assertPiceOnSquare('3_4')
     await board.assertSquareEmpty('5_2')
@@ -37,9 +38,9 @@ test.describe('Checkers Game E2E', () => {
     state['2_5'] = [Color.Black, PawnType.PawnBlack]
     await board.setBoardState(state)
     await board.setTurn(Color.Black)
-    await page.waitForTimeout(100)
+    await page.waitForTimeout(1000)
     await board.dragPiceToSquare('2_5', '4_3')
-    await page.waitForTimeout(300)
+    await page.waitForTimeout(1000)
     await board.assertPiceOnSquare('4_3')
     await board.assertSquareEmpty('2_5')
     await board.assertSquareEmpty('3_4')
@@ -60,18 +61,17 @@ test.describe('Checkers Game E2E', () => {
 
     await board.setBoardState(state)
     await board.setTurn(Color.White)
-    await page.waitForTimeout(100)
+    await page.waitForTimeout(1000)
 
-    // First jump
     await board.dragPiceToSquare('7_2', '5_4')
-    await page.waitForTimeout(300)
+    await page.waitForTimeout(1000)
     await board.assertPiceOnSquare('5_4')
     await board.assertSquareEmpty('7_2')
     await board.assertSquareEmpty('6_3')
 
     // Second jump (should still be White's turn because multi-jump is available)
     await board.dragPiceToSquare('5_4', '3_6')
-    await page.waitForTimeout(300)
+    await page.waitForTimeout(1000)
     await board.assertPiceOnSquare('3_6')
     await board.assertSquareEmpty('5_4')
     await board.assertSquareEmpty('4_5')

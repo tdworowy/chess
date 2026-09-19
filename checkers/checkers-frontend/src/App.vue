@@ -33,7 +33,8 @@ const setState = (newState: { [key: string]: [Color, PawnType] }) => {
           value[0] === Color.White
             ? existingPawn.classList.contains('White') ||
               existingPawn.classList.contains(PawnType.PawnWhite)
-            : !existingPawn.classList.contains('White')
+            : !existingPawn.classList.contains('White') &&
+              !existingPawn.classList.contains('PawnWhite')
 
         // Ensure it's in the correct square
         const parentSquare = existingPawn.parentElement
@@ -71,6 +72,11 @@ const setState = (newState: { [key: string]: [Color, PawnType] }) => {
         if (event.dataTransfer) {
           event.dataTransfer.effectAllowed = 'move'
         }
+      })
+
+      // Also handle dragover to allow drop
+      newPawn.addEventListener('dragover', (event: DragEvent) => {
+        event.preventDefault()
       })
 
       const square = document.querySelector(`[id='${key}'][class*='square']`)
