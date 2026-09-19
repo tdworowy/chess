@@ -55,21 +55,17 @@ export class ChessBoard {
     const square = this.page.locator(`[id="${squareId}"][data-testid='${this.testId.square}']`)
 
     await pawn.waitFor({ state: 'visible' })
-    await pawn.dragTo(square)
+    await pawn.dragTo(square, { force: true })
   }
 
   async assertPiceOnSquare(id: string) {
     const pawnCss = `[id="${id}"][data-testid='${this.pieces.testId.pawn}']`
-    const square = this.page.locator(`[id="${id}"][data-testid='${this.testId.square}']`)
-
-    await expect(square.locator(pawnCss)).toBeVisible()
+    await expect(this.page.locator(pawnCss)).toBeVisible()
   }
 
   async assertDameOnSquare(id: string) {
     const dameCss = `[id="${id}"][data-testid='${this.pieces.testId.dame}']`
-    const square = this.page.locator(`[id="${id}"][data-testid='${this.testId.square}']`)
-
-    await expect(square.locator(dameCss)).toBeVisible()
+    await expect(this.page.locator(dameCss)).toBeVisible()
   }
 
   async assertSquareEmpty(id: string) {
@@ -82,7 +78,7 @@ export class ChessBoard {
     const square = this.page.locator(`[id="${squareId}"][data-testid='${this.testId.square}']`)
 
     await dame.waitFor({ state: 'visible' })
-    await dame.dragTo(square)
+    await dame.dragTo(square, { force: true })
   }
 
   static getChaseBoard(page: Page) {

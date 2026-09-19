@@ -129,7 +129,9 @@ class PawnsBeatRules {
     boardState: { [key: string]: [Color, PawnType] }
   ) {
     const opposedColor =
-      boardState[`${startX}_${startY}`][0] === Color.Black ? Color.White : Color.Black
+      boardState[`${startX}_${startY}`] && boardState[`${startX}_${startY}`][0] === Color.Black
+        ? Color.White
+        : Color.Black
     return (
       boardState[`${endX}_${endY}`][0] === Color.Empty &&
       startX !== endX &&

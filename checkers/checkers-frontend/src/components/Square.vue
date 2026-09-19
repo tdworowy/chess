@@ -120,15 +120,18 @@ function beat(
     }
   } else {
     y = startY > endY ? startY - 1 : startY + 1
-    x = boardState[`${startX}_${startY}`][0] === Color.Black ? startX + 1 : startX - 1
+    const color = boardState[`${startX}_${startY}`][0]
+    x = color === Color.Black ? startX + 1 : startX - 1
   }
 
-  boardState[`${x}_${y}`] = [Color.Empty, PawnType.Empty]
-  console.log(`[beat] Removing pawn from ${x}_${y}`)
-  document
-    .querySelector(`[id='${x}_${y}'][class*='pawn'], [id='${x}_${y}'][class*='dame']`)
-    ?.remove()
-  setState(boardState)
+  if (boardState[`${x}_${y}`]) {
+    boardState[`${x}_${y}`] = [Color.Empty, PawnType.Empty]
+    console.log(`[beat] Removing pawn from ${x}_${y}`)
+    document
+      .querySelector(`[id='${x}_${y}'][class*='pawn'], [id='${x}_${y}'][class*='dame']`)
+      ?.remove()
+    setState(boardState)
+  }
 }
 
 function drop(event: DragEvent) {
@@ -137,6 +140,7 @@ function drop(event: DragEvent) {
   event.preventDefault()
   const draggableElementId = event.dataTransfer!.getData('id')
   const targetElementId = (event.currentTarget as HTMLElement).getAttribute('id')
+  if (!targetElementId) return
 
   const [startX, startY] = draggableElementId.split('_').map((id) => Number(id))
   const [endX, endY] = targetElementId!.split('_').map((id) => Number(id))
@@ -174,7 +178,7 @@ function drop(event: DragEvent) {
     if (elementToMove.parentElement !== currentTarget) {
       currentTarget.appendChild(elementToMove)
     }
-    elementToMove.id = currentTarget.id
+    elementToMove.id = targetElementId!
 
     if (checkersRules.canBecomeDame(endX, endY, boardState)) {
       boardState[targetElementId!][1] = PawnType.Dame
@@ -209,21 +213,26 @@ function drop(event: DragEvent) {
 
     console.log(`[drop] Triggering AI move.`)
     checkersRules.nextTurn()
-    Api.healthCheck()
-      .then((statusCode) => {
-        let boardStateTemp = getState() as { [key: string]: [Color, PawnType] }
-        if (statusCode === 200) {
-          Api.makeRandomMove(Player.Black, boardStateTemp).then((newBoardState) => {
-            //console.log(next_move_json)
-            updateBoard(boardStateTemp, newBoardState)
-            setState(newBoardState)
-            checkersRules.nextTurn()
-          })
-        }
-      })
-      .catch(() => {
-        // Do nothing, let the turn stay as it is (it's already switched to AI's color)
-      })
+    // Small delay to allow DOM to stabilize before AI move
+    setTimeout(() => {
+      Api.healthCheck()
+        .then((statusCode) => {
+          let boardStateTemp = getState() as { [key: string]: [Color, PawnType] }
+          if (statusCode === 200) {
+            Api.makeRandomMove(Player.Black, boardStateTemp).then((newBoardState) => {
+              if (newBoardState) {
+                //console.log(next_move_json)
+                updateBoard(boardStateTemp, newBoardState)
+                setState(newBoardState)
+                checkersRules.nextTurn()
+              }
+            })
+          }
+        })
+        .catch(() => {
+          // Do nothing, let the turn stay as it is (it's already switched to AI's color)
+        })
+    }, 10)
   }
 }
 </script>
