@@ -10,7 +10,7 @@ test.describe('Checkers Game E2E', () => {
     })
   })
 
-  test('single beating', async ({ page }) => {
+  test('single beating - white', async ({ page }) => {
     const board = ChessBoard.getChaseBoard(page)
 
     const state: any = {}
@@ -32,8 +32,17 @@ test.describe('Checkers Game E2E', () => {
     await board.assertPiceOnSquare('3_4')
     await board.assertSquareEmpty('5_2')
     await board.assertSquareEmpty('4_3')
+  })
 
-    // Test Black side beating
+  test('single beating - black', async ({ page }) => {
+    const board = ChessBoard.getChaseBoard(page)
+
+    const state: any = {}
+    for (let i = 1; i <= 8; i++) {
+      for (let j = 1; j <= 8; j++) {
+        state[`${i}_${j}`] = [Color.Empty, PawnType.Empty]
+      }
+    }
     state['3_4'] = [Color.White, PawnType.PawnWhite]
     state['2_5'] = [Color.Black, PawnType.PawnBlack]
     await board.setBoardState(state)
