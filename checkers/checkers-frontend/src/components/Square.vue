@@ -45,7 +45,6 @@ function updateBoard(
       const existingPawn = document.querySelector(
         `[id='${key}'][class*='pawn'], [id='${key}'][class*='dame']`
       )
-
       if (value[0] == Color.Empty) {
         if (existingPawn) {
           console.log(`[updateBoard] Removing pawn from ${key}`)

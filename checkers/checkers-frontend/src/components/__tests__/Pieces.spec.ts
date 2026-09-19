@@ -29,7 +29,7 @@ describe('Pieces component', () => {
     mount(Pieces, {
       props: { x: 0, y: 0 }
     })
-// Note: Pieces.vue currently only has templates for PawnBlack and PawnWhite
+    // Note: Pieces.vue currently only has templates for PawnBlack and PawnWhite
     // It seems Dame rendering is handled by manual DOM manipulation in Square.vue and App.vue
     // Let's verify this in the Pieces.vue template.
   })
