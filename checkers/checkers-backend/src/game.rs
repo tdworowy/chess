@@ -96,6 +96,12 @@ pub struct GameState {
     pub board_state: [FieldState; 64],
 }
 
+#[derive(Serialize, Debug, PartialEq)]
+pub struct RlAction {
+    pub from: String,
+    pub to: String,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AvailableActions {
     pub pawns_can_move: HashMap<usize, Vec<usize>>,
@@ -316,6 +322,34 @@ pub fn get_available_actions(game_state: &GameState) -> AvailableActions {
         dames_can_move,
         dames_can_beat,
     }
+}
+
+pub fn serialize_available_actions(game_state: &GameState) -> Vec<RlAction> {
+    let available = get_available_actions(game_state);
+
+    let moves = available
+        .pawns_can_move
+        .into_iter()
+        .chain(available.dames_can_move)
+        .flat_map(|(from, moves)| {
+            moves.into_iter().map(move |to| RlAction {
+                from: from.to_string().clone(),
+                to: to.to_string(),
+            })
+        });
+
+    let beats = available
+        .pawns_can_beat
+        .into_iter()
+        .chain(available.dames_can_beat)
+        .flat_map(|(from, moves)| {
+            moves.into_iter().map(move |(_, to)| RlAction {
+                from: from.to_string().clone(),
+                to: to.to_string(),
+            })
+        });
+
+    moves.chain(beats).collect()
 }
 
 fn is_position_free(game_state: &GameState, idx: usize) -> bool {
@@ -696,4 +730,70 @@ fn test_serialization() {
 
     let deserialized: GameState = serde_json::from_str(&serialized).unwrap();
     assert_eq!(game_state, deserialized);
+}
+
+#[test]
+fn test_serialize_available_actions() {
+    let mut board = [FieldState {
+        pawn_color: PawnColor::Empty,
+        pawn_type: PawnType::Empty,
+    }; 64];
+
+    // White pawn at 45 (row 6, col 6) can move to 36 and 38
+    board[45] = FieldState {
+        pawn_color: PawnColor::White,
+        pawn_type: PawnType::Pawn,
+    };
+
+    let game_state = GameState {
+        player: Player::White,
+        board_state: board,
+    };
+
+    let serialized = serialize_available_actions(&game_state);
+    assert_eq!(serialized.len(), 2);
+    assert!(serialized.contains(&RlAction {
+        from: "45".to_string(),
+        to: "36".to_string(),
+    }));
+    assert!(serialized.contains(&RlAction {
+        from: "45".to_string(),
+        to: "38".to_string(),
+    }));
+
+    // Test capture
+    let mut board = [FieldState {
+        pawn_color: PawnColor::Empty,
+        pawn_type: PawnType::Empty,
+    }; 64];
+
+    // White pawn at 45
+    board[45] = FieldState {
+        pawn_color: PawnColor::White,
+        pawn_type: PawnType::Pawn,
+    };
+    // Black pawn at 36
+    board[36] = FieldState {
+        pawn_color: PawnColor::Black,
+        pawn_type: PawnType::Pawn,
+    };
+
+    let game_state = GameState {
+        player: Player::White,
+        board_state: board,
+    };
+
+    // White should be able to beat (45 -> 36 -> 27)
+    let serialized = serialize_available_actions(&game_state);
+    // Note: serialize_available_actions currently returns BOTH moves and beats if they exist
+    // In this case, it has one move (45 -> 38) and one beat (45 -> 27)
+    assert_eq!(serialized.len(), 2);
+    assert!(serialized.contains(&RlAction {
+        from: "45".to_string(),
+        to: "27".to_string(),
+    }));
+    assert!(serialized.contains(&RlAction {
+        from: "45".to_string(),
+        to: "38".to_string(),
+    }));
 }
