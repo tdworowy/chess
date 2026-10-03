@@ -11,11 +11,11 @@ from utils import generate_init_board, generate_init_board_no_empty
     [
         ("http://localhost:8080/healthcheck", {"message": "OK"}),
         (
-            "http://localhost:8080/get_example",
-            {
-                "board_state": generate_init_board_no_empty(),
-                "player": "Black",
-            },
+                "http://localhost:8080/get_example",
+                {
+                    "board_state": generate_init_board_no_empty(),
+                    "player": "Black",
+                },
         ),
     ],
 )
@@ -53,3 +53,16 @@ def test_make_random_move():
     )
     assert response.status_code == 200
     assert response.json() != data
+
+
+def test_get_available_moves():
+    data = {
+        "player": "Black",
+        "board_state": generate_init_board(),
+    }
+    response = requests.post(
+        "http://localhost:8080/get_available_moves",
+        headers={"Content-Type": "application/json"},
+        json=data,
+    )
+    assert response.status_code == 200
