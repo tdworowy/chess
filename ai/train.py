@@ -15,6 +15,8 @@ model = MaskablePPO(
     env,
     verbose=1,
     tensorboard_log="./runs/",
+    n_steps=128,
+    batch_size=64,  # small numbers for testing
     policy_kwargs={
         "net_arch": {
             "pi": [256, 256],
@@ -24,7 +26,7 @@ model = MaskablePPO(
 )
 
 model.learn(
-    total_timesteps=1_000_0,  # 1_000_000
+    total_timesteps=500,  # 1_000_000 TODO for more iteration it need better performance
     progress_bar=True,
 )
 

@@ -19,7 +19,7 @@ class CheckersApi:
     def make_move(
         self,
         state: dict,
-    ) -> dict:
+    ) -> dict | str:
         response = self.session.post(
             f"{self.base_url}/make_ai_move",
             headers={"Content-Type": "application/json"},
@@ -27,9 +27,12 @@ class CheckersApi:
         )
 
         response.raise_for_status()
-        return response.json()
+        try:
+            return response.json()
+        except requests.exceptions.JSONDecodeError:
+            return response.text
 
-    def make_random_move(self, state: dict) -> dict:
+    def make_random_move(self, state: dict) -> dict | str:
         response = self.session.post(
             f"{self.base_url}/make_random_move",
             headers={"Content-Type": "application/json"},
@@ -37,4 +40,7 @@ class CheckersApi:
         )
 
         response.raise_for_status()
-        return response.json()
+        try:
+            return response.json()
+        except requests.exceptions.JSONDecodeError:
+            return response.text
