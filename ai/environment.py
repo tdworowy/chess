@@ -7,12 +7,21 @@ from encoding import decode_move, encode_move, encode_state
 
 
 class CheckersEnv(gym.Env):
+    """
+    Checkers environment for reinforcement learning using Gymnasium.
+    """
 
     def __init__(
         self,
         api_url: str,
         initial_state: dict,
     ):
+        """
+        Initialize the Checkers environment.
+
+        :param api_url: The URL of the Checkers API.
+        :param initial_state: The initial board state dictionary.
+        """
         super().__init__()
 
         self.api = CheckersApi(api_url)
@@ -31,6 +40,14 @@ class CheckersEnv(gym.Env):
         self.current_actions = []
 
     def make_move(self, source: str, destination: str):
+        """
+        Execute a move on the board and call the API to update the state.
+
+        :param source: The source square identifier.
+        :param destination: The destination square identifier.
+        :return: The new state dictionary or a string message if no moves are available.
+        :raises ValueError: If the move is invalid (e.g., source square is empty).
+        """
         current_piece = self.state["board_state"].get(source)
 
         if current_piece is None or current_piece["pawn_color"] == "Empty":
@@ -58,6 +75,13 @@ class CheckersEnv(gym.Env):
         return response
 
     def reset(self, seed=None, options=None):
+        """
+        Reset the environment to its initial state.
+
+        :param seed: Random seed for reproducibility.
+        :param options: Additional options for reset.
+        :return: A tuple of (observation, info).
+        """
         super().reset(seed=seed)
         self.state = self.initial_state.copy()
         self.current_actions = self.api.available_actions(self.state)
@@ -66,6 +90,11 @@ class CheckersEnv(gym.Env):
         return observation, {}
 
     def action_masks(self):
+        """
+        Generate a mask of valid actions for the current state.
+
+        :return: A boolean array where True indicates a valid action.
+        """
         mask = np.zeros(
             32 * 32,
             dtype=bool,
@@ -81,6 +110,14 @@ class CheckersEnv(gym.Env):
         return mask
 
     def step(self, action):
+        """
+        Execute a single step in the environment.
+
+        This includes the agent's move and the opponent's (random) move.
+
+        :param action: The action integer to execute.
+        :return: A tuple of (observation, reward, terminated, truncated, info).
+        """
         source, destination = decode_move(int(action))
 
         # Defensive check.

@@ -1,4 +1,6 @@
-# train.py
+"""
+Script to train a MaskablePPO agent on the Checkers environment.
+"""
 
 from sb3_contrib import MaskablePPO
 

@@ -2,10 +2,23 @@ import numpy as np
 
 
 def encode_action(src: int, dst: int) -> int:
+    """
+    Encode a move from source index and destination index into a single integer action.
+
+    :param src: Source square index (0-31).
+    :param dst: Destination square index (0-31).
+    :return: Encoded action.
+    """
     return src * 32 + dst
 
 
 def decode_action(action: int) -> tuple[int, int]:
+    """
+    Decode a single integer action into source index and destination index.
+
+    :param action: Encoded action integer.
+    :return: A tuple of (source_index, destination_index).
+    """
     return divmod(action, 32)
 
 
@@ -23,14 +36,14 @@ SQUARE_TO_INDEX = {
 INDEX_TO_SQUARE = {index: square for square, index in SQUARE_TO_INDEX.items()}
 
 
-# def encode_move(source: str, destination: str) -> int:
-#     source_index = int(source) - 1
-#     destination_index = int(destination) - 1
-#
-#     return source_index * 32 + destination_index
-
-
 def square_index(square: str) -> int:
+    """
+    Convert a square string (e.g., "1_2" or "1") to its 0-31 index.
+
+    :param square: Square identifier string.
+    :return: Index of the square (0-31).
+    :raises ValueError: If the square number is out of the valid range [1, 32].
+    """
     if "_" in square:
         return SQUARE_TO_INDEX[square]
 
@@ -42,6 +55,13 @@ def square_index(square: str) -> int:
 
 
 def encode_move(source: str, destination: str) -> int:
+    """
+    Encode a move from source square string and destination square string into a single integer action.
+
+    :param source: Source square string identifier.
+    :param destination: Destination square string identifier.
+    :return: Encoded action integer.
+    """
     source_index = square_index(source)
     destination_index = square_index(destination)
 
@@ -49,6 +69,12 @@ def encode_move(source: str, destination: str) -> int:
 
 
 def decode_move(action: int) -> tuple[str, str]:
+    """
+    Decode an action integer into source and destination square strings.
+
+    :param action: Encoded action integer.
+    :return: A tuple of (source_square_string, destination_square_string).
+    """
     source, destination = divmod(action, 32)
 
     return (
@@ -58,6 +84,15 @@ def decode_move(action: int) -> tuple[str, str]:
 
 
 def encode_state(state: dict) -> np.ndarray:
+    """
+    Encode the board state into a numerical format suitable for RL.
+
+    The encoding includes piece positions (1 for Black Pawn, 2 for Black King,
+    -1 for White Pawn, -2 for White King) and the current player.
+
+    :param state: The current game state dictionary.
+    :return: A numpy array representing the encoded state.
+    """
     board = state["board_state"]
     encoded = np.zeros(33, dtype=np.float32)
 

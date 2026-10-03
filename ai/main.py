@@ -1,4 +1,7 @@
 def main():
+    """
+    Main entry point for the AI module.
+    """
     print("Hello from ai!")
 
 

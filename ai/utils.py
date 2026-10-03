@@ -1,4 +1,9 @@
 def generate_init_board() -> dict:
+    """
+    Generate an initial checkers board with all squares (including empty ones).
+
+    :return: A dictionary mapping square coordinates (e.g., "1_2") to piece info.
+    """
     result = {}
     for i in range(1, 9):
         for j in range(1, 9):
@@ -19,6 +24,11 @@ def generate_init_board() -> dict:
 
 
 def generate_init_board_no_empty() -> dict:
+    """
+    Generate an initial checkers board excluding empty squares.
+
+    :return: A dictionary mapping occupied square coordinates to piece info.
+    """
     init_board = generate_init_board()
     return {
         position: pawn
