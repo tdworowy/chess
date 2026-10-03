@@ -15,7 +15,7 @@ pub async fn make_ai_move_api(game_state: web::Json<GameState>) -> impl Responde
         Some(state) => HttpResponse::Ok()
             .append_header(("Access-Control-Allow-Origin", "*"))
             .json(state),
-        None => HttpResponse::BadRequest()
+        None => HttpResponse::Ok()
             .append_header(("Access-Control-Allow-Origin", "*"))
             .body("No available moves"),
     }

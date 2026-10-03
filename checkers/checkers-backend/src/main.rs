@@ -2,11 +2,12 @@ pub mod ai;
 pub mod api;
 pub mod game;
 
-use api::{
-    get_available_moves, get_example, healthcheck, healthcheck_options, make_ai_move_api,
-    make_ai_move_options_api, make_random_move_api, make_random_move_options_api, get_available_moves_options_api
-};
 use actix_web::{App, HttpServer};
+use api::{
+    get_available_moves, get_available_moves_options_api, get_example, healthcheck,
+    healthcheck_options, make_ai_move_api, make_ai_move_options_api, make_random_move_api,
+    make_random_move_options_api,
+};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
