@@ -96,6 +96,12 @@ pub struct GameState {
     pub board_state: [FieldState; 64],
 }
 
+#[derive(Serialize, Debug, PartialEq)]
+pub struct RlAction {
+    pub from: String,
+    pub to: String,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AvailableActions {
     pub pawns_can_move: HashMap<usize, Vec<usize>>,
@@ -316,6 +322,82 @@ pub fn get_available_actions(game_state: &GameState) -> AvailableActions {
         dames_can_move,
         dames_can_beat,
     }
+}
+
+fn square_to_rl_number(square: &str) -> String {
+    let (row, col) = square
+        .split_once('_')
+        .expect("Square must be in x_y format");
+
+    let row: usize = row.parse().expect("Invalid row");
+    let col: usize = col.parse().expect("Invalid column");
+
+    assert!((1..=8).contains(&row));
+    assert!((1..=8).contains(&col));
+    assert_eq!(
+        (row + col) % 2,
+        1,
+        "Square {square} is not a playable square"
+    );
+
+    let position_in_row = if row % 2 == 1 {
+        // odd rows: 1_2, 1_4, 1_6, 1_8
+        col / 2
+    } else {
+        // even rows: 2_1, 2_3, 2_5, 2_7
+        (col + 1) / 2
+    };
+
+    let number = (row - 1) * 4 + position_in_row;
+
+    number.to_string()
+}
+
+pub fn serialize_available_actions(game_state: &GameState) -> Vec<RlAction> {
+    let available = get_available_actions(game_state);
+
+    let moves = available
+        .pawns_can_move
+        .into_iter()
+        .chain(available.dames_can_move)
+        .flat_map(|(from, moves)| {
+            let row = from / 8 + 1;
+            let col = from % 8 + 1;
+            let from_str = format!("{}_{}", row, col);
+            let from_rl = square_to_rl_number(&from_str);
+
+            moves.into_iter().map(move |to| {
+                let row_to = to / 8 + 1;
+                let col_to = to % 8 + 1;
+                let to_str = format!("{}_{}", row_to, col_to);
+                RlAction {
+                    from: from_rl.clone(),
+                    to: square_to_rl_number(&to_str),
+                }
+            })
+        });
+
+    let beats = available
+        .pawns_can_beat
+        .into_iter()
+        .chain(available.dames_can_beat)
+        .flat_map(|(from, moves)| {
+            let row = from / 8 + 1;
+            let col = from % 8 + 1;
+            let from_str = format!("{}_{}", row, col);
+            let from_rl = square_to_rl_number(&from_str);
+
+            moves.into_iter().map(move |(_, to)| {
+                let row_to = to / 8 + 1;
+                let col_to = to % 8 + 1;
+                let to_str = format!("{}_{}", row_to, col_to);
+                RlAction {
+                    from: from_rl.clone(),
+                    to: square_to_rl_number(&to_str),
+                }
+            })
+        });
+    moves.chain(beats).collect()
 }
 
 fn is_position_free(game_state: &GameState, idx: usize) -> bool {
@@ -696,4 +778,133 @@ fn test_serialization() {
 
     let deserialized: GameState = serde_json::from_str(&serialized).unwrap();
     assert_eq!(game_state, deserialized);
+}
+
+#[test]
+fn test_serialize_available_actions() {
+    let mut board = [FieldState {
+        pawn_color: PawnColor::Empty,
+        pawn_type: PawnType::Empty,
+    }; 64];
+
+    // White pawn at 44 (row 6, col 5) can move to 35 and 37
+    board[44] = FieldState {
+        pawn_color: PawnColor::White,
+        pawn_type: PawnType::Pawn,
+    };
+
+    let game_state = GameState {
+        player: Player::White,
+        board_state: board,
+    };
+
+    let serialized = serialize_available_actions(&game_state);
+    assert_eq!(serialized.len(), 2);
+    // 44 is 6_5. row=6, col=5. row even. position_in_row = (5+1)/2 = 3. number = (6-1)*4 + 3 = 23.
+    assert!(serialized.contains(&RlAction {
+        from: "23".to_string(),
+        to: "18".to_string(), // 35 is 5_4. row=5, col=4. row odd. position_in_row = 4/2 = 2. number = (5-1)*4 + 2 = 18.
+    }));
+    assert!(serialized.contains(&RlAction {
+        from: "23".to_string(),
+        to: "19".to_string(), // 37 is 5_6. row=5, col=6. row odd. position_in_row = 6/2 = 3. number = (5-1)*4 + 3 = 19.
+    }));
+
+    // Test capture
+    let mut board = [FieldState {
+        pawn_color: PawnColor::Empty,
+        pawn_type: PawnType::Empty,
+    }; 64];
+
+    // White pawn at 44
+    board[44] = FieldState {
+        pawn_color: PawnColor::White,
+        pawn_type: PawnType::Pawn,
+    };
+    // Black pawn at 35
+    board[35] = FieldState {
+        pawn_color: PawnColor::Black,
+        pawn_type: PawnType::Pawn,
+    };
+
+    let game_state = GameState {
+        player: Player::White,
+        board_state: board,
+    };
+
+    // White should be able to beat (44 -> 35 -> 26)
+    let serialized = serialize_available_actions(&game_state);
+    // Note: serialize_available_actions currently returns BOTH moves and beats if they exist
+    // In this case, it has one move (44 -> 37) and one beat (44 -> 26)
+    assert_eq!(serialized.len(), 2);
+    // 44 -> 23
+    // 37 -> 19
+    // 26 is 4_3. row=4, col=3. row even. position_in_row = (3+1)/2 = 2. number = (4-1)*4 + 2 = 14.
+    assert!(serialized.contains(&RlAction {
+        from: "23".to_string(),
+        to: "14".to_string(),
+    }));
+    assert!(serialized.contains(&RlAction {
+        from: "23".to_string(),
+        to: "19".to_string(),
+    }));
+}
+
+#[test]
+fn test_serialize_available_actions_strict() {
+    let mut board = [FieldState {
+        pawn_color: PawnColor::Empty,
+        pawn_type: PawnType::Empty,
+    }; 64];
+
+    // White pawn at 44 (can move to 35, 37)
+    board[44] = FieldState {
+        pawn_color: PawnColor::White,
+        pawn_type: PawnType::Pawn,
+    };
+    // Black pawn at 17 (row 3, col 2) can move to 24, 26
+    board[17] = FieldState {
+        pawn_color: PawnColor::Black,
+        pawn_type: PawnType::Pawn,
+    };
+
+    // Case 1: White's turn
+    let game_state_white = GameState {
+        player: Player::White,
+        board_state: board,
+    };
+
+    let actions_white = serialize_available_actions(&game_state_white);
+
+    // Should only contain White's moves
+    assert_eq!(actions_white.len(), 2);
+    // 44 -> 23
+    assert!(actions_white.iter().all(|a| a.from == "23"));
+    // 35 -> 18
+    // 37 -> 19
+    assert!(actions_white.iter().any(|a| a.to == "18"));
+    assert!(actions_white.iter().any(|a| a.to == "19"));
+
+    // Verify it doesn't contain Black's moves
+    // 17 is 3_2. row=3, col=2. row odd. position_in_row = 2/2 = 1. number = (3-1)*4 + 1 = 9.
+    assert!(!actions_white.iter().any(|a| a.from == "9"));
+
+    // Case 2: Black's turn
+    let game_state_black = GameState {
+        player: Player::Black,
+        board_state: board,
+    };
+
+    let actions_black = serialize_available_actions(&game_state_black);
+
+    // Should only contain Black's moves
+    assert_eq!(actions_black.len(), 2);
+    assert!(actions_black.iter().all(|a| a.from == "9"));
+    // 24 is 4_1. row=4, col=1. row even. position_in_row = (1+1)/2 = 1. number = (4-1)*4 + 1 = 13.
+    // 26 is 4_3. row=4, col=3. row even. position_in_row = (3+1)/2 = 2. number = (4-1)*4 + 2 = 14.
+    assert!(actions_black.iter().any(|a| a.to == "13"));
+    assert!(actions_black.iter().any(|a| a.to == "14"));
+
+    // Verify it doesn't contain White's moves
+    assert!(!actions_black.iter().any(|a| a.from == "23"));
 }

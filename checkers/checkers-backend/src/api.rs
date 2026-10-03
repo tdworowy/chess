@@ -5,6 +5,7 @@ use game::{get_start_board, make_random_move, GameState, Player};
 
 use crate::ai::get_best_move;
 use crate::game;
+use crate::game::serialize_available_actions;
 
 #[post("/make_ai_move")]
 pub async fn make_ai_move_api(game_state: web::Json<GameState>) -> impl Responder {
@@ -14,7 +15,7 @@ pub async fn make_ai_move_api(game_state: web::Json<GameState>) -> impl Responde
         Some(state) => HttpResponse::Ok()
             .append_header(("Access-Control-Allow-Origin", "*"))
             .json(state),
-        None => HttpResponse::BadRequest()
+        None => HttpResponse::Ok()
             .append_header(("Access-Control-Allow-Origin", "*"))
             .body("No available moves"),
     }
@@ -46,6 +47,27 @@ pub async fn make_random_move_api(game_state: web::Json<GameState>) -> impl Resp
 
 #[options("/make_random_move")]
 pub async fn make_random_move_options_api() -> impl Responder {
+    HttpResponse::Ok()
+        .append_header(("Allow", "OPTIONS, POST"))
+        .append_header(("Access-Control-Allow-Methods", "POST, OPTIONS"))
+        .append_header(("Access-Control-Allow-Headers", "Content-Type"))
+        .append_header(("Access-Control-Allow-Origin", "*"))
+        .finish()
+}
+
+#[post("/get_available_moves")]
+pub async fn get_available_moves(game_state: web::Json<GameState>) -> impl Responder {
+    let game_state = game_state.into_inner();
+    let available_moves = serialize_available_actions(&game_state);
+    match available_moves {
+        moves => HttpResponse::Ok()
+            .append_header(("Access-Control-Allow-Origin", "*"))
+            .json(moves),
+    }
+}
+
+#[options("/get_available_moves")]
+pub async fn get_available_moves_options_api() -> impl Responder {
     HttpResponse::Ok()
         .append_header(("Allow", "OPTIONS, POST"))
         .append_header(("Access-Control-Allow-Methods", "POST, OPTIONS"))
