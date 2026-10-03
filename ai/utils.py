@@ -16,3 +16,12 @@ def generate_init_board() -> dict:
                 continue
             result[f"{i}_{j}"] = {"pawn_color": "Empty", "pawn_type": "Empty"}
     return result
+
+
+def generate_init_board_no_empty() -> dict:
+    init_board = generate_init_board()
+    return {
+        position: pawn
+        for position, pawn in init_board.items()
+        if pawn["pawn_color"] != "Empty"
+    }

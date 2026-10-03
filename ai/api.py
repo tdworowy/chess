@@ -21,7 +21,7 @@ class CheckersApi:
         state: dict,
     ) -> dict:
         response = self.session.post(
-            f"{self.base_url}/make_move",
+            f"{self.base_url}/make_ai_move",
             headers={"Content-Type": "application/json"},
             json=state,
         )

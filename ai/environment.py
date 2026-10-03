@@ -31,7 +31,11 @@ class CheckersEnv(gym.Env):
         self.current_actions = []
 
     def make_move(self, source: str, destination: str):
-        current_piece = self.state["board_state"][source]
+        current_piece = self.state["board_state"].get(source)
+
+        if current_piece is None or current_piece["pawn_color"] == "Empty":
+            raise ValueError(f"Cannot move from empty square: {source}")
+
         self.state["board_state"][destination] = current_piece
         self.state["board_state"][source] = {
             "pawn_color": "Empty",
@@ -49,7 +53,7 @@ class CheckersEnv(gym.Env):
 
     def action_masks(self):
         mask = np.zeros(
-            self.action_space.n,
+            32 * 32,
             dtype=bool,
         )
 

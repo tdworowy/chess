@@ -13,12 +13,39 @@ PLAYABLE_SQUARES = [
     f"{row}_{col}" for row in range(1, 9) for col in range(1, 9) if (row + col) % 2 == 1
 ]
 
-SQUARE_TO_INDEX = {square: i for i, square in enumerate(PLAYABLE_SQUARES)}
-INDEX_TO_SQUARE = {i: square for square, i in SQUARE_TO_INDEX.items()}
+SQUARE_TO_INDEX = {
+    f"{row}_{col}": index
+    for index, (row, col) in enumerate(
+        (row, col) for row in range(1, 9) for col in range(1, 9) if (row + col) % 2 == 1
+    )
+}
+
+INDEX_TO_SQUARE = {index: square for square, index in SQUARE_TO_INDEX.items()}
+
+
+# def encode_move(source: str, destination: str) -> int:
+#     source_index = int(source) - 1
+#     destination_index = int(destination) - 1
+#
+#     return source_index * 32 + destination_index
+
+
+def square_index(square: str) -> int:
+    if "_" in square:
+        return SQUARE_TO_INDEX[square]
+
+    number = int(square)
+    if not 1 <= number <= 32:
+        raise ValueError(f"Invalid checkers square: {square}")
+
+    return number - 1
 
 
 def encode_move(source: str, destination: str) -> int:
-    return SQUARE_TO_INDEX[source] * 32 + SQUARE_TO_INDEX[destination]
+    source_index = square_index(source)
+    destination_index = square_index(destination)
+
+    return source_index * 32 + destination_index
 
 
 def decode_move(action: int) -> tuple[str, str]:
@@ -31,22 +58,23 @@ def decode_move(action: int) -> tuple[str, str]:
 
 
 def encode_state(state: dict) -> np.ndarray:
-    result = np.zeros(33, dtype=np.float32)
-
-    values = {
-        ("Black", "Pawn"): 1,
-        ("Black", "Dame"): 2,
-        ("White", "Pawn"): -1,
-        ("White", "Dame"): -2,
-        ("Empty", "Empty"): 0,
-    }
-
     board = state["board_state"]
+    encoded = np.zeros(33, dtype=np.float32)
 
-    for square, i in SQUARE_TO_INDEX.items():
-        square_sate = board[square]
-        result[i] = values[(square_sate["pawn_color"], square_sate["pawn_type"])]
+    for square, index in SQUARE_TO_INDEX.items():
+        field = board.get(square)
+        # Missing square = empty square
+        if field is None:
+            continue
 
-    result[32] = 1 if state["player"] == "Black" else -1
+        color = field["pawn_color"]
+        piece = field["pawn_type"]
 
-    return result
+        if color == "Black":
+            encoded[index] = 1 if piece == "Pawn" else 2
+        elif color == "White":
+            encoded[index] = -1 if piece == "Pawn" else -2
+
+    encoded[32] = 1 if state["player"] == "Black" else -1
+
+    return encoded
