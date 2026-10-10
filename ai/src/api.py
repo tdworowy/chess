@@ -42,7 +42,7 @@ class CheckersApi:
         :return: The new state dictionary or a string message if no moves are available.
         """
         response = self.session.post(
-            f"{self.base_url}/make_ai_move",
+            f"{self.base_url}/make_ai_move_easy",
             headers={"Content-Type": "application/json"},
             json=state,
         )

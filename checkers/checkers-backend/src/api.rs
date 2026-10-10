@@ -31,6 +31,30 @@ pub async fn make_ai_move_options_api() -> impl Responder {
         .finish()
 }
 
+#[post("/make_ai_move_easy")]
+pub async fn make_ai_move_api_easy(game_state: web::Json<GameState>) -> impl Responder {
+    let game_state = game_state.into_inner();
+    let new_game_state = get_best_move(&game_state, 1);
+    match new_game_state {
+        Some(state) => HttpResponse::Ok()
+            .append_header(("Access-Control-Allow-Origin", "*"))
+            .json(state),
+        None => HttpResponse::Ok()
+            .append_header(("Access-Control-Allow-Origin", "*"))
+            .body("No available moves"),
+    }
+}
+
+#[options("/make_ai_move_easy")]
+pub async fn make_ai_move_options_api_easy() -> impl Responder {
+    HttpResponse::Ok()
+        .append_header(("Allow", "OPTIONS, POST"))
+        .append_header(("Access-Control-Allow-Methods", "POST, OPTIONS"))
+        .append_header(("Access-Control-Allow-Headers", "Content-Type"))
+        .append_header(("Access-Control-Allow-Origin", "*"))
+        .finish()
+}
+
 #[post("/make_random_move")]
 pub async fn make_random_move_api(game_state: web::Json<GameState>) -> impl Responder {
     let game_state = game_state.into_inner();

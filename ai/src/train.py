@@ -22,8 +22,8 @@ env = CheckersEnv(
 # Use EvalCallback for periodic evaluation and logging
 eval_callback = EvalCallback(
     eval_env,
-    best_model_save_path="../logs/",
-    log_path="../logs/",
+    best_model_save_path="logs/",
+    log_path="logs/",
     eval_freq=1000,
     deterministic=True,
     render=False,
@@ -34,8 +34,8 @@ model = MaskablePPO(
     env,
     verbose=1,
     tensorboard_log="./runs/",
-    n_steps=128,
-    batch_size=64,  # small numbers for testing
+    n_steps=2048,  # 128
+    batch_size=128,  # 64 small numbers for testing
     policy_kwargs={
         "net_arch": {
             "pi": [256, 256],
@@ -45,7 +45,7 @@ model = MaskablePPO(
 )
 
 model.learn(
-    total_timesteps=5000,  # Increased for better visualization
+    total_timesteps=200000,  # 5000 Increased for better visualization
     progress_bar=True,
     callback=eval_callback,
 )
