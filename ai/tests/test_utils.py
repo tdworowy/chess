@@ -1,4 +1,4 @@
-from utils import generate_init_board, generate_init_board_no_empty
+from src.utils import generate_init_board, generate_init_board_no_empty
 
 
 def test_generate_init_board():

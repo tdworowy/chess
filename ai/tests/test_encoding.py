@@ -1,8 +1,14 @@
-import numpy as np
 import pytest
 
-from encoding import (SQUARE_TO_INDEX, decode_action, decode_move,
-                      encode_action, encode_move, encode_state, square_index)
+from src.encoding import (
+    SQUARE_TO_INDEX,
+    decode_action,
+    decode_move,
+    encode_action,
+    encode_move,
+    encode_state,
+    square_index,
+)
 
 
 def test_action_encoding_decoding():

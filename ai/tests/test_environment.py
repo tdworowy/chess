@@ -1,10 +1,10 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 
-from encoding import encode_move
-from environment import CheckersEnv
+from src.encoding import encode_move
+from src.environment import CheckersEnv
 
 
 @pytest.fixture

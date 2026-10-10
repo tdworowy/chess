@@ -22,8 +22,8 @@ env = CheckersEnv(
 # Use EvalCallback for periodic evaluation and logging
 eval_callback = EvalCallback(
     eval_env,
-    best_model_save_path="./logs/",
-    log_path="./logs/",
+    best_model_save_path="../logs/",
+    log_path="../logs/",
     eval_freq=1000,
     deterministic=True,
     render=False,

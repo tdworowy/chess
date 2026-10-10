@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 
-def launch_tensorboard(logdir="./runs/"):
+def launch_tensorboard(logdir: str = "./runs/") -> None:
     """
     Launch TensorBoard to visualize training progress.
     """

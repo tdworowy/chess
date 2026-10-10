@@ -1,3 +1,5 @@
+from typing import Any
+
 import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
@@ -27,7 +29,7 @@ class CheckersEnv(gym.Env):
         self.api = CheckersApi(api_url)
         self.agent_color = "Black"
         self.initial_state = {"player": self.agent_color, "board_state": initial_state}
-        self.state = None
+        self.state: dict[str, Any] | None = None
 
         self.action_space = spaces.Discrete(32 * 32)
         self.observation_space = spaces.Box(
@@ -37,7 +39,7 @@ class CheckersEnv(gym.Env):
             dtype=np.float32,
         )
 
-        self.current_actions = []
+        self.current_actions: list[dict] = []
 
     def make_move(self, source: str, destination: str):
         """
@@ -48,7 +50,7 @@ class CheckersEnv(gym.Env):
         :return: The new state dictionary or a string message if no moves are available.
         :raises ValueError: If the move is invalid (e.g., source square is empty).
         """
-        current_piece = self.state["board_state"].get(source)
+        current_piece: dict | None = self.state["board_state"].get(source)
 
         if current_piece is None or current_piece["pawn_color"] == "Empty":
             raise ValueError(f"Cannot move from empty square: {source}")

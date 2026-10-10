@@ -1,9 +1,9 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 import requests
 
-from api import CheckersApi
+from src.api import CheckersApi
 
 
 def test_api_init():
