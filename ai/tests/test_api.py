@@ -65,7 +65,7 @@ def test_make_move_text():
         assert result == mock_text
 
 
-def test_make_random_move_json():
+def test_make_move_easy_json():
     api = CheckersApi("http://localhost:8080")
     state = {"player": "Black", "board_state": {}}
     mock_response = {"player": "White", "board_state": {}}
@@ -74,7 +74,7 @@ def test_make_random_move_json():
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = mock_response
 
-        result = api.make_random_move(state)
+        result = api.make_move(state)
 
         assert result == mock_response
 

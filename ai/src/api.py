@@ -1,4 +1,5 @@
 import requests
+from typing import Any
 
 
 class CheckersApi:
@@ -15,7 +16,7 @@ class CheckersApi:
         self.base_url = base_url
         self.session = requests.Session()
 
-    def available_actions(self, state: dict) -> list[dict]:
+    def available_actions(self, state: dict[str, Any]) -> list[dict[str, str]]:
         """
         Get all available moves for the current state.
 
@@ -33,8 +34,8 @@ class CheckersApi:
 
     def make_move(
         self,
-        state: dict,
-    ) -> dict | str:
+        state: dict[str, Any],
+    ) -> dict[str, Any] | str:
         """
         Make an AI move based on the provided state.
 
@@ -43,25 +44,6 @@ class CheckersApi:
         """
         response = self.session.post(
             f"{self.base_url}/make_ai_move_easy",
-            headers={"Content-Type": "application/json"},
-            json=state,
-        )
-
-        response.raise_for_status()
-        try:
-            return response.json()
-        except requests.exceptions.JSONDecodeError:
-            return response.text
-
-    def make_random_move(self, state: dict) -> dict | str:
-        """
-        Make a random move based on the provided state.
-
-        :param state: The current board state and player.
-        :return: The new state dictionary or a string message if no moves are available.
-        """
-        response = self.session.post(
-            f"{self.base_url}/make_random_move",
             headers={"Content-Type": "application/json"},
             json=state,
         )

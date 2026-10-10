@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Any
 
 
 def encode_action(src: int, dst: int) -> int:
@@ -83,7 +84,7 @@ def decode_move(action: int) -> tuple[str, str]:
     )
 
 
-def encode_state(state: dict) -> np.ndarray:
+def encode_state(state: dict[str, Any]) -> np.ndarray:
     """
     Encode the board state into a numerical format suitable for RL.
 

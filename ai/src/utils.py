@@ -1,4 +1,7 @@
-def generate_init_board() -> dict:
+from typing import Any
+
+
+def generate_init_board() -> dict[str, dict[str, str]]:
     """
     Generate an initial checkers board with all squares (including empty ones).
 
@@ -23,7 +26,7 @@ def generate_init_board() -> dict:
     return result
 
 
-def generate_init_board_no_empty() -> dict:
+def generate_init_board_no_empty() -> dict[str, dict[str, str]]:
     """
     Generate an initial checkers board excluding empty squares.
 

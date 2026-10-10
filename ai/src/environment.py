@@ -16,7 +16,7 @@ class CheckersEnv(gym.Env):
     def __init__(
         self,
         api_url: str,
-        initial_state: dict,
+        initial_state: dict[str, dict[str, str]],
     ):
         """
         Initialize the Checkers environment.
@@ -39,9 +39,9 @@ class CheckersEnv(gym.Env):
             dtype=np.float32,
         )
 
-        self.current_actions: list[dict] = []
+        self.current_actions: list[dict[str, str]] = []
 
-    def make_move(self, source: str, destination: str):
+    def make_move(self, source: str, destination: str) -> dict[str, Any] | str:
         """
         Execute a move on the board and call the API to update the state.
 
@@ -55,7 +55,7 @@ class CheckersEnv(gym.Env):
         if current_piece is None or current_piece["pawn_color"] == "Empty":
             raise ValueError(f"Cannot move from empty square: {source}")
 
-        # Create a deep copy of the board state to avoid modifying it in place if make_move fails
+        # Create a deep copy of the board state
         new_board_state = self.state["board_state"].copy()
         new_board_state[destination] = current_piece
         new_board_state[source] = {
@@ -63,20 +63,30 @@ class CheckersEnv(gym.Env):
             "pawn_type": "Empty",
         }
 
-        new_state = {"player": self.state["player"], "board_state": new_board_state}
+        next_player = "White" if self.agent_color == "Black" else "Black"
+        agent_move_state = {"player": next_player, "board_state": new_board_state}
 
-        response = self.api.make_move(new_state)
+        response = self.api.make_move(agent_move_state)
+        
         if isinstance(response, str) and "No available moves" in response:
-            # If the move leads to no more moves for anyone (should not happen in checkers unless game ends)
-            # or if the API just returns this when a player has no moves.
-            # In our case, make_move is called after an agent move to get the state after AI (opponent) move.
-            self.state = new_state
+            # Opponent has no moves, agent wins.
+            # We keep the board as it was after agent's move.
+            # But we must set the player to agent's color so that available_actions works for the next check.
+            self.state = agent_move_state
+            self.state["player"] = self.agent_color
             return response
 
         self.state = response
+        # The backend does not toggle the player in the response.
+        # After the opponent's move, it should be the agent's turn again.
+        self.state["player"] = self.agent_color
         return response
 
-    def reset(self, seed=None, options=None):
+    def reset(
+        self,
+        seed: int | None = None,
+        options: dict[str, Any] | None = None,
+    ) -> tuple[np.ndarray, dict[str, Any]]:
         """
         Reset the environment to its initial state.
 
@@ -91,7 +101,7 @@ class CheckersEnv(gym.Env):
         observation = encode_state(self.state)
         return observation, {}
 
-    def action_masks(self):
+    def action_masks(self) -> np.ndarray:
         """
         Generate a mask of valid actions for the current state.
 
@@ -111,11 +121,14 @@ class CheckersEnv(gym.Env):
             mask[action] = True
         return mask
 
-    def step(self, action):
+    def step(
+        self,
+        action: int,
+    ) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
         """
         Execute a single step in the environment.
 
-        This includes the agent's move and the opponent's (random) move.
+        This includes the agent's move and the opponent's move.
 
         :param action: The action integer to execute.
         :return: A tuple of (observation, reward, terminated, truncated, info).
@@ -123,9 +136,6 @@ class CheckersEnv(gym.Env):
         source, destination = decode_move(int(action))
 
         # Defensive check.
-        #
-        # During actual MaskablePPO training this should
-        # never happen.
         mask = self.action_masks()
         if not mask[action]:
             return (
@@ -136,32 +146,11 @@ class CheckersEnv(gym.Env):
                 {"invalid_action": True},
             )
 
-        # Agent move
+        # Agent move + Opponent move
         res = self.make_move(source=source, destination=destination)
 
-        # Check if the move resulted in "No available moves" from the API
+        # Check if the opponent had no moves (Agent wins)
         if isinstance(res, str) and "No available moves" in res:
-            return (
-                encode_state(self.state),
-                1.0,
-                True,
-                False,
-                {"winner": self.agent_color, "reason": "No available moves"},
-            )
-
-        # Check whether opponent has lost
-        opponent_actions = self.api.available_actions(self.state)
-        if not opponent_actions:
-            return (
-                encode_state(self.state),
-                1.0,
-                True,
-                False,
-                {"winner": self.agent_color},
-            )
-        # Opponent move
-        response = self.api.make_random_move(self.state)
-        if isinstance(response, str) and "No available moves" in response:
             return (
                 encode_state(self.state),
                 1.0,
@@ -169,9 +158,8 @@ class CheckersEnv(gym.Env):
                 False,
                 {"winner": self.agent_color, "reason": "Opponent has no moves"},
             )
-        self.state = response
 
-        # Check whether we lost
+        # Check if we (Agent) have any moves left for the next turn
         self.current_actions = self.api.available_actions(self.state)
         if not self.current_actions:
             return (
@@ -179,8 +167,9 @@ class CheckersEnv(gym.Env):
                 -1.0,
                 True,
                 False,
-                {"winner": "White"},
+                {"winner": "White" if self.agent_color == "Black" else "Black"},
             )
+
         return (
             encode_state(self.state),
             0.0,
