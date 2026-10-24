@@ -4,3 +4,5 @@ __pycache__
 /logs
 .zip
 checkers_ppo.zip
+/src/logs
+/src/runs

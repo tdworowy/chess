@@ -2,7 +2,9 @@ pub mod ai;
 pub mod api;
 pub mod game;
 
-use crate::api::{make_ai_move_api_easy, make_ai_move_options_api_easy};
+use crate::api::{
+    apply_move_api, apply_move_options_api, make_ai_move_api_easy, make_ai_move_options_api_easy,
+};
 use actix_web::{App, HttpServer};
 use api::{
     get_available_moves, get_available_moves_options_api, get_example, healthcheck,
@@ -22,6 +24,8 @@ async fn main() -> std::io::Result<()> {
             .service(make_random_move_options_api)
             .service(get_available_moves)
             .service(get_available_moves_options_api)
+            .service(apply_move_api)
+            .service(apply_move_options_api)
             .service(healthcheck)
             .service(healthcheck_options)
             .service(get_example)

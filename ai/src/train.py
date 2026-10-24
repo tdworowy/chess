@@ -3,7 +3,7 @@ Script to train a MaskablePPO agent on the Checkers environment.
 """
 
 from sb3_contrib import MaskablePPO
-from stable_baselines3.common.callbacks import EvalCallback
+from sb3_contrib.common.maskable.callbacks import MaskableEvalCallback
 
 from environment import CheckersEnv
 from utils import generate_init_board_no_empty
@@ -19,8 +19,8 @@ env = CheckersEnv(
     initial_state=generate_init_board_no_empty(),
 )
 
-# Use EvalCallback for periodic evaluation and logging
-eval_callback = EvalCallback(
+# Use the mask-aware callback so evaluation only selects legal moves.
+eval_callback = MaskableEvalCallback(
     eval_env,
     best_model_save_path="logs/",
     log_path="logs/",

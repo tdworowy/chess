@@ -49,18 +49,26 @@ def test_make_move_success(env):
         "player": "White",
         "board_state": {"2_3": {"pawn_color": "Black", "pawn_type": "Pawn"}},
     }
+    env.api.apply_move.return_value = {
+        "player": "Black",
+        "board_state": {"2_3": {"pawn_color": "Black", "pawn_type": "Pawn"}},
+    }
     env.api.make_move.return_value = mock_response
 
     res = env.make_move("1_2", "2_3")
 
     assert res == mock_response
     assert env.state == mock_response
+    env.api.apply_move.assert_called_once_with(env.initial_state, "1_2", "2_3")
+    assert env.api.make_move.call_args.args[0]["player"] == "White"
 
 
-def test_make_move_invalid(env):
+def test_make_move_invalid_is_rejected_by_api(env):
     env.state = {"player": "Black", "board_state": {}}
-    with pytest.raises(ValueError, match="Cannot move from empty square"):
+    env.api.apply_move.side_effect = ValueError("Illegal move")
+    with pytest.raises(ValueError, match="Illegal move"):
         env.make_move("1_2", "2_3")
+    env.api.make_move.assert_not_called()
 
 
 def test_step_invalid_action(env):
@@ -76,11 +84,46 @@ def test_step_invalid_action(env):
     assert info["invalid_action"] == True
 
 
+def test_step_rewards_material_gain(env):
+    env.initial_state = {
+        "player": "Black",
+        "board_state": {
+            "3_2": {"pawn_color": "Black", "pawn_type": "Pawn"},
+            "4_3": {"pawn_color": "White", "pawn_type": "Pawn"},
+        },
+    }
+    capture = {"from": "3_2", "to": "5_4"}
+    env.api.available_actions.side_effect = [
+        [capture],
+        [{"from": "5_4", "to": "6_3"}],
+    ]
+    env.api.apply_move.return_value = {
+        "player": "Black",
+        "board_state": {"5_4": {"pawn_color": "Black", "pawn_type": "Pawn"}},
+    }
+    env.api.make_move.return_value = {
+        "player": "Black",
+        "board_state": {"5_4": {"pawn_color": "Black", "pawn_type": "Pawn"}},
+    }
+    env.reset()
+
+    action = encode_move("3_2", "5_4")
+    _, reward, terminated, _, info = env.step(action)
+
+    assert reward == pytest.approx(0.1)
+    assert not terminated
+    assert info["material_delta"] == 1
+
+
 def test_step_win_on_no_moves(env):
     env.api.available_actions.return_value = [{"from": "1_2", "to": "2_3"}]
     env.reset()
 
     action = encode_move("1_2", "2_3")
+    env.api.apply_move.return_value = {
+        "player": "Black",
+        "board_state": {"2_3": {"pawn_color": "Black", "pawn_type": "Pawn"}},
+    }
     env.api.make_move.return_value = "No available moves"
 
     obs, reward, terminated, truncated, info = env.step(action)
@@ -90,20 +133,18 @@ def test_step_win_on_no_moves(env):
     assert info["winner"] == "Black"
 
 
-def test_step_win_after_random_move_fails(env):
+def test_step_win_when_ai_has_no_moves(env):
     env.api.available_actions.side_effect = [
         [{"from": "1_2", "to": "2_3"}],  # for reset
-        [{"from": "8_7", "to": "7_6"}],  # for opponent actions check
-        [],  # for our actions check at the end (should not be reached if opponent fails)
     ]
     env.reset()
 
     action = encode_move("1_2", "2_3")
-    env.api.make_move.return_value = {
-        "player": "White",
+    env.api.apply_move.return_value = {
+        "player": "Black",
         "board_state": {"2_3": {"pawn_color": "Black", "pawn_type": "Pawn"}},
     }
-    env.api.make_random_move.return_value = "Status: No available moves"
+    env.api.make_move.return_value = "No available moves"
 
     obs, reward, terminated, truncated, info = env.step(action)
 
@@ -115,18 +156,19 @@ def test_step_win_after_random_move_fails(env):
 def test_step_loss(env):
     env.api.available_actions.side_effect = [
         [{"from": "1_2", "to": "2_3"}],  # for reset
-        [{"from": "8_7", "to": "7_6"}],  # for opponent actions check
         [],  # for our actions check - we have no moves!
     ]
     env.reset()
 
     action = encode_move("1_2", "2_3")
+    env.api.apply_move.return_value = {
+        "player": "Black",
+        "board_state": {"2_3": {"pawn_color": "Black", "pawn_type": "Pawn"}},
+    }
     env.api.make_move.return_value = {
         "player": "White",
         "board_state": {"2_3": {"pawn_color": "Black", "pawn_type": "Pawn"}},
     }
-    env.api.make_random_move.return_value = {"player": "Black", "board_state": {}}
-
     obs, reward, terminated, truncated, info = env.step(action)
 
     assert reward == -1.0
