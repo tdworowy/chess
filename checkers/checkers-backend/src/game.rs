@@ -102,6 +102,13 @@ pub struct RlAction {
     pub to: String,
 }
 
+#[derive(Deserialize)]
+pub struct MoveRequest {
+    pub state: GameState,
+    pub from: String,
+    pub to: String,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AvailableActions {
     pub pawns_can_move: HashMap<usize, Vec<usize>>,
@@ -324,6 +331,52 @@ pub fn get_available_actions(game_state: &GameState) -> AvailableActions {
     }
 }
 
+fn parse_square(square: &str) -> Option<usize> {
+    let (row, col) = square.split_once('_')?;
+    let row: usize = row.parse().ok()?;
+    let col: usize = col.parse().ok()?;
+    if !(1..=8).contains(&row) || !(1..=8).contains(&col) || (row + col) % 2 != 1 {
+        return None;
+    }
+    Some((row - 1) * 8 + (col - 1))
+}
+
+/// Validate and apply one move from the position supplied by the caller.
+/// Captures are mandatory whenever any piece can capture.
+pub fn apply_player_move(request: MoveRequest) -> Result<GameState, &'static str> {
+    let start = parse_square(&request.from).ok_or("Invalid source square")?;
+    let destination = parse_square(&request.to).ok_or("Invalid destination square")?;
+    let actions = get_available_actions(&request.state);
+    let has_capture = !actions.pawns_can_beat.is_empty() || !actions.dames_can_beat.is_empty();
+
+    let capture = actions
+        .pawns_can_beat
+        .get(&start)
+        .or_else(|| actions.dames_can_beat.get(&start))
+        .and_then(|captures| {
+            captures
+                .iter()
+                .find(|(_, landing)| *landing == destination)
+                .copied()
+        });
+    if let Some(capture) = capture {
+        return Ok(beat(request.state, start, capture));
+    }
+    if has_capture {
+        return Err("A capture is available; a capture must be made");
+    }
+
+    let legal_move = actions
+        .pawns_can_move
+        .get(&start)
+        .or_else(|| actions.dames_can_move.get(&start))
+        .is_some_and(|destinations| destinations.contains(&destination));
+    if !legal_move {
+        return Err("Illegal move");
+    }
+    Ok(make_move(request.state, start, destination))
+}
+
 fn square_to_rl_number(square: &str) -> String {
     let (row, col) = square
         .split_once('_')
@@ -355,6 +408,7 @@ fn square_to_rl_number(square: &str) -> String {
 
 pub fn serialize_available_actions(game_state: &GameState) -> Vec<RlAction> {
     let available = get_available_actions(game_state);
+    let has_capture = !available.pawns_can_beat.is_empty() || !available.dames_can_beat.is_empty();
 
     let moves = available
         .pawns_can_move
@@ -397,7 +451,11 @@ pub fn serialize_available_actions(game_state: &GameState) -> Vec<RlAction> {
                 }
             })
         });
-    moves.chain(beats).collect()
+    if has_capture {
+        beats.collect()
+    } else {
+        moves.collect()
+    }
 }
 
 fn is_position_free(game_state: &GameState, idx: usize) -> bool {
@@ -699,6 +757,120 @@ fn test_get_available_actions_white() {
     );
 }
 
+fn empty_board() -> [FieldState; 64] {
+    [FieldState {
+        pawn_color: PawnColor::Empty,
+        pawn_type: PawnType::Empty,
+    }; 64]
+}
+
+#[test]
+fn test_apply_player_move_applies_legal_quiet_move() {
+    let mut board_state = empty_board();
+    board_state[17] = FieldState {
+        pawn_color: PawnColor::Black,
+        pawn_type: PawnType::Pawn,
+    };
+    let state = GameState {
+        player: Player::Black,
+        board_state,
+    };
+
+    let result = apply_player_move(MoveRequest {
+        state,
+        from: "3_2".into(),
+        to: "4_3".into(),
+    })
+    .unwrap();
+
+    assert_eq!(result.board_state[17].pawn_color, PawnColor::Empty);
+    assert_eq!(result.board_state[26].pawn_color, PawnColor::Black);
+    assert_eq!(result.player, Player::Black);
+}
+
+#[test]
+fn test_apply_player_move_captures_opponent_piece() {
+    let mut board_state = empty_board();
+    board_state[17] = FieldState {
+        pawn_color: PawnColor::Black,
+        pawn_type: PawnType::Pawn,
+    };
+    board_state[26] = FieldState {
+        pawn_color: PawnColor::White,
+        pawn_type: PawnType::Pawn,
+    };
+    let state = GameState {
+        player: Player::Black,
+        board_state,
+    };
+
+    let result = apply_player_move(MoveRequest {
+        state,
+        from: "3_2".into(),
+        to: "5_4".into(),
+    })
+    .unwrap();
+
+    assert_eq!(result.board_state[17].pawn_color, PawnColor::Empty);
+    assert_eq!(result.board_state[26].pawn_color, PawnColor::Empty);
+    assert_eq!(result.board_state[35].pawn_color, PawnColor::Black);
+}
+
+#[test]
+fn test_apply_player_move_rejects_quiet_move_when_capture_exists() {
+    let mut board_state = empty_board();
+    board_state[17] = FieldState {
+        pawn_color: PawnColor::Black,
+        pawn_type: PawnType::Pawn,
+    };
+    board_state[26] = FieldState {
+        pawn_color: PawnColor::White,
+        pawn_type: PawnType::Pawn,
+    };
+    let state = GameState {
+        player: Player::Black,
+        board_state,
+    };
+
+    let result = apply_player_move(MoveRequest {
+        state,
+        from: "3_2".into(),
+        to: "4_1".into(),
+    });
+
+    assert_eq!(
+        result,
+        Err("A capture is available; a capture must be made")
+    );
+}
+
+#[test]
+fn test_apply_player_move_rejects_wrong_turn_piece_and_invalid_square() {
+    let mut board_state = empty_board();
+    board_state[40] = FieldState {
+        pawn_color: PawnColor::White,
+        pawn_type: PawnType::Pawn,
+    };
+    let state = GameState {
+        player: Player::Black,
+        board_state,
+    };
+
+    let wrong_turn = apply_player_move(MoveRequest {
+        state: state.clone(),
+        from: "6_1".into(),
+        to: "5_2".into(),
+    });
+    assert_eq!(wrong_turn, Err("Illegal move"));
+
+    let invalid_square = apply_player_move(MoveRequest {
+        state,
+        from: "1_1".into(),
+        to: "2_2".into(),
+    });
+    assert_eq!(invalid_square, Err("Invalid source square"));
+}
+
 #[test]
 fn test_is_position_free() {
     let game_state = GameState {
@@ -834,9 +1006,8 @@ fn test_serialize_available_actions() {
 
     // White should be able to beat (44 -> 35 -> 26)
     let serialized = serialize_available_actions(&game_state);
-    // Note: serialize_available_actions currently returns BOTH moves and beats if they exist
-    // In this case, it has one move (44 -> 37) and one beat (44 -> 26)
-    assert_eq!(serialized.len(), 2);
+    // Captures are mandatory, so the ordinary move (44 -> 37) is omitted.
+    assert_eq!(serialized.len(), 1);
     // 44 -> 23
     // 37 -> 19
     // 26 is 4_3. row=4, col=3. row even. position_in_row = (3+1)/2 = 2. number = (4-1)*4 + 2 = 14.
@@ -844,7 +1015,7 @@ fn test_serialize_available_actions() {
         from: "23".to_string(),
         to: "14".to_string(),
     }));
-    assert!(serialized.contains(&RlAction {
+    assert!(!serialized.contains(&RlAction {
         from: "23".to_string(),
         to: "19".to_string(),
     }));

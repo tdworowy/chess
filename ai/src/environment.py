@@ -41,6 +41,18 @@ class CheckersEnv(gym.Env):
 
         self.current_actions: list[dict[str, str]] = []
 
+    def _material_balance(self, state: dict[str, Any]) -> int:
+        """Return material advantage from the agent's perspective."""
+        piece_values = {"Pawn": 1, "Dame": 3}
+        balance = 0
+        for piece in state["board_state"].values():
+            value = piece_values.get(piece["pawn_type"], 0)
+            if piece["pawn_color"] == self.agent_color:
+                balance += value
+            elif piece["pawn_color"] not in ("Empty", self.agent_color):
+                balance -= value
+        return balance
+
     def make_move(self, source: str, destination: str) -> dict[str, Any] | str:
         """
         Execute a move on the board and call the API to update the state.
@@ -48,26 +60,16 @@ class CheckersEnv(gym.Env):
         :param source: The source square identifier.
         :param destination: The destination square identifier.
         :return: The new state dictionary or a string message if no moves are available.
-        :raises ValueError: If the move is invalid (e.g., source square is empty).
+        :raises requests.HTTPError: If the backend rejects the move.
         """
-        current_piece: dict | None = self.state["board_state"].get(source)
-
-        if current_piece is None or current_piece["pawn_color"] == "Empty":
-            raise ValueError(f"Cannot move from empty square: {source}")
-
-        # Create a deep copy of the board state
-        new_board_state = self.state["board_state"].copy()
-        new_board_state[destination] = current_piece
-        new_board_state[source] = {
-            "pawn_color": "Empty",
-            "pawn_type": "Empty",
-        }
-
         next_player = "White" if self.agent_color == "Black" else "Black"
-        agent_move_state = {"player": next_player, "board_state": new_board_state}
+        # Send the original position and move so Rust can validate and apply
+        # captures without trusting a client-edited board.
+        agent_move_state = self.api.apply_move(self.state, source, destination)
+        agent_move_state["player"] = next_player
 
         response = self.api.make_move(agent_move_state)
-        
+
         if isinstance(response, str) and "No available moves" in response:
             # Opponent has no moves, agent wins.
             # We keep the board as it was after agent's move.
@@ -146,6 +148,8 @@ class CheckersEnv(gym.Env):
                 {"invalid_action": True},
             )
 
+        previous_material = self._material_balance(self.state)
+
         # Agent move + Opponent move
         res = self.make_move(source=source, destination=destination)
 
@@ -170,10 +174,12 @@ class CheckersEnv(gym.Env):
                 {"winner": "White" if self.agent_color == "Black" else "Black"},
             )
 
+        # Reward material gained or lost over the agent/opponent turn.
+        material_delta = self._material_balance(self.state) - previous_material
         return (
             encode_state(self.state),
-            0.0,
+            0.1 * material_delta,
             False,
             False,
-            {},
+            {"material_delta": material_delta},
         )

@@ -1,3 +1,1 @@
 uv run black .
-
-TODO better reward system, not only for wining

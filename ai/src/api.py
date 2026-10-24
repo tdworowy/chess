@@ -32,6 +32,18 @@ class CheckersApi:
         response.raise_for_status()
         return response.json()
 
+    def apply_move(
+        self, state: dict[str, Any], source: str, destination: str
+    ) -> dict[str, Any]:
+        """Validate and apply a player's move using the pre-move state."""
+        response = self.session.post(
+            f"{self.base_url}/apply_move",
+            headers={"Content-Type": "application/json"},
+            json={"state": state, "from": source, "to": destination},
+        )
+        response.raise_for_status()
+        return response.json()
+
     def make_move(
         self,
         state: dict[str, Any],

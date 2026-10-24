@@ -31,6 +31,31 @@ def test_available_actions():
         )
 
 
+def test_apply_move_sends_pre_move_state_and_move():
+    api = CheckersApi("http://localhost:8080")
+    state = {
+        "player": "Black",
+        "board_state": {"3_2": {"pawn_color": "Black", "pawn_type": "Pawn"}},
+    }
+    updated_state = {
+        "player": "Black",
+        "board_state": {"4_3": {"pawn_color": "Black", "pawn_type": "Pawn"}},
+    }
+
+    with patch.object(api.session, "post") as mock_post:
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = updated_state
+
+        result = api.apply_move(state, "3_2", "4_3")
+
+        assert result == updated_state
+        mock_post.assert_called_once_with(
+            "http://localhost:8080/apply_move",
+            headers={"Content-Type": "application/json"},
+            json={"state": state, "from": "3_2", "to": "4_3"},
+        )
+
+
 def test_make_move_json():
     api = CheckersApi("http://localhost:8080")
     state = {"player": "Black", "board_state": {}}
