@@ -22,6 +22,19 @@ MAX_EPISODE_STEPS = 200
 EVAL_FREQUENCY = 5_000
 EVAL_EPISODES = 10
 
+# 2,048 steps with 128-sample minibatches gives PPO 16 minibatches per epoch.
+N_STEPS = 2_048
+BATCH_SIZE = 128
+N_EPOCHS = 10
+LEARNING_RATE = 3e-4
+
+# Checkers games can run for many turns, so retain more of the terminal
+# win/loss signal and keep a small amount of policy exploration.
+GAMMA = 0.995
+GAE_LAMBDA = 0.98
+ENTROPY_COEFFICIENT = 0.005
+TARGET_KL = 0.03
+
 
 def make_env() -> Monitor:
     """Create an episode-monitored environment with a limit for endless games."""
@@ -40,6 +53,10 @@ def main() -> None:
     print(f"Training run: {run_id}")
     print(f"Checkers API: {API_URL}")
     print(f"Timesteps: {TOTAL_TIMESTEPS:,}; evaluation every {EVAL_FREQUENCY:,} steps")
+    print(
+        f"PPO: n_steps={N_STEPS}, batch_size={BATCH_SIZE}, n_epochs={N_EPOCHS}, "
+        f"gamma={GAMMA}, gae_lambda={GAE_LAMBDA}, ent_coef={ENTROPY_COEFFICIENT}"
+    )
     print(f"TensorBoard logs: {RUNS_DIR}")
     print(f"Episode/evaluation reports: {LOG_DIR}")
 
@@ -71,8 +88,14 @@ def main() -> None:
         training_env,
         verbose=1,
         tensorboard_log=str(RUNS_DIR),
-        n_steps=2048,
-        batch_size=128,
+        learning_rate=LEARNING_RATE,
+        n_steps=N_STEPS,
+        batch_size=BATCH_SIZE,
+        n_epochs=N_EPOCHS,
+        gamma=GAMMA,
+        gae_lambda=GAE_LAMBDA,
+        ent_coef=ENTROPY_COEFFICIENT,
+        target_kl=TARGET_KL,
         policy_kwargs={
             "net_arch": {
                 "pi": [256, 256],

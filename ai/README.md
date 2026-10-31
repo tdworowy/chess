@@ -13,6 +13,8 @@ uv run python src/train.py
 
 Set `CHECKERS_API_URL` to use a different API address. Set `CHECKERS_TRAINING_TIMESTEPS` to change the default 200,000 training steps.
 
+The PPO rollout uses `n_steps=2048` and `batch_size=128`, yielding 16 minibatches per epoch with one environment. It trains for 10 epochs per rollout at a `3e-4` learning rate. `gamma=0.995` and `gae_lambda=0.98` preserve more learning signal from later game outcomes; `ent_coef=0.005` retains some exploration, and `target_kl=0.03` limits overly large policy updates.
+
 The terminal shows a timestep progress bar, training episode outcomes, and an evaluation summary every 5,000 steps. Evaluation plays 10 games. Games that reach 200 agent turns are counted as draws, so a repeating game cannot stall training indefinitely. API requests time out after 30 seconds.
 
 ## View charts
