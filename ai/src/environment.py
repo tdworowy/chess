@@ -17,16 +17,18 @@ class CheckersEnv(gym.Env):
         self,
         api_url: str,
         initial_state: dict[str, dict[str, str]],
+        api_timeout: float | None = 30.0,
     ):
         """
         Initialize the Checkers environment.
 
         :param api_url: The URL of the Checkers API.
         :param initial_state: The initial board state dictionary.
+        :param api_timeout: Maximum seconds to wait for each API response.
         """
         super().__init__()
 
-        self.api = CheckersApi(api_url)
+        self.api = CheckersApi(api_url, timeout=api_timeout)
         self.agent_color = "Black"
         self.initial_state = {"player": self.agent_color, "board_state": initial_state}
         self.state: dict[str, Any] | None = None
